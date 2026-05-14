@@ -207,11 +207,13 @@ If you have a cable with an e-marker, the "Report this cable" button in the app 
 Built by [Darryl Morley](https://github.com/darrylmorley).
 
 **Contributors:**
-- [@IonBazan](https://github.com/IonBazan) - i18n migration, Polish, Simplified Chinese, and Italian translations, obsolete vendor IDs
-- [@JimmFly](https://github.com/JimmFly) - localisation infrastructure
-- [@Jerryvda](https://github.com/Jerryvda) - Armenian translation
+- [@IonBazan](https://github.com/IonBazan) - i18n migration to .lproj/.strings, Polish translation, obsolete vendor IDs
+- [@JimmFly](https://github.com/JimmFly) - localisation infrastructure, Simplified Chinese translation
 - [@bovirus](https://github.com/bovirus) - Italian translation
+- [@Vardan933](https://github.com/Vardan933) - Armenian translation
+- [@hobostay](https://github.com/hobostay) - SIGTERM handling, charging threshold fix
 - [@abrauchli](https://github.com/abrauchli) - screenshot fix
+- [@blech](https://github.com/blech) - Cmd+R refresh shortcut, window tabbing fix
 
 **Sponsors:**
 - [@1A1zRyan](https://github.com/1A1zRyan)
