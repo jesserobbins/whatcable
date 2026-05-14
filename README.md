@@ -206,9 +206,18 @@ If you have a cable with an e-marker, the "Report this cable" button in the app 
 
 Built by [Darryl Morley](https://github.com/darrylmorley).
 
-**Translations:**
-- Armenian: [@Jerryvda](https://github.com/Jerryvda)
-- Italian: [@IonBazan](https://github.com/IonBazan)
-- Polish and Simplified Chinese: [@IonBazan](https://github.com/IonBazan)
+**Contributors:**
+- [@IonBazan](https://github.com/IonBazan) - i18n migration, Polish, Simplified Chinese, and Italian translations, obsolete vendor IDs
+- [@JimmFly](https://github.com/JimmFly) - localisation infrastructure
+- [@Jerryvda](https://github.com/Jerryvda) - Armenian translation
+- [@bovirus](https://github.com/bovirus) - Italian translation
+- [@abrauchli](https://github.com/abrauchli) - screenshot fix
+
+**Sponsors:**
+- [@1A1zRyan](https://github.com/1A1zRyan)
+- [@SpartanDavie](https://github.com/SpartanDavie)
+- [@zippykeyop](https://github.com/zippykeyop)
+
+Thanks to everyone who has filed cable reports, bug reports, and IOKit dumps. These contributions directly improve the cable database and help WhatCable handle more hardware correctly.
 
 Inspired by every time someone has asked "*is this cable any good?*".
