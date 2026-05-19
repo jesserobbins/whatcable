@@ -277,6 +277,7 @@
         <ul>
           <li><strong>Headline:</strong> Thunderbolt / USB4, USB device, Charging only, Slow USB / charge-only cable, or Nothing connected.</li>
           <li><strong>Charging diagnostic:</strong> whether the cable, charger, or Mac is the bottleneck, with the negotiated wattage.</li>
+          <li><strong>Data-speed diagnostic:</strong> a plain-English verdict on what is limiting the link, the Mac port, the cable, or the device, so you know whether a faster cable would actually help.</li>
           <li><strong>Cable e-marker info:</strong> the cable's actual speed (USB 2.0 up to 80 Gbps), current rating (3A or 5A), and the e-marker chip vendor.</li>
           <li><strong>Charger PDO list:</strong> every voltage profile the charger advertises (5V, 9V, 15V, 20V, etc.), with the active one highlighted.</li>
           <li><strong>Connected device:</strong> vendor name and product type from the PD Discover Identity response.</li>
@@ -365,6 +366,11 @@
         <h2 id="pro">Pro features</h2>
         <p>
           <a href="/pro">WhatCable Pro</a> is a one-time purchase that adds deeper diagnostics on top of everything in the free app. All free features stay free. Pro adds the following:
+        </p>
+
+        <h3>Negotiation Diagnostics <span class="pro-badge">Pro</span></h3>
+        <p>
+          The free app gives a one-line verdict on what is limiting a connection. Pro shows the full breakdown: what the Mac port, the cable, and the device each support, side by side with what was actually negotiated and the weak link highlighted, plus a cross-check of the cable's e-marker against the Thunderbolt controller so a cable that under-reports itself is caught. Pro screens open inside the app, with an optional detach into their own window so a screen can stay open while you swap cables.
         </p>
 
         <h3>Live power metering <span class="pro-badge">Pro</span></h3>

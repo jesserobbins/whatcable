@@ -24,6 +24,8 @@ Per port, in plain English:
   - *"Cable is limiting charging speed"* (cable rated below the charger)
   - *"Charging at 30W (charger can do up to 96W)"* (Mac is asking for less, e.g. battery near full)
   - *"Charging well at 96W"* (everything matches)
+  - *"Battery full, not charging"* (plugged in, battery full, so the Mac isn't drawing power)
+- **Data-speed diagnostic:** a plain-English verdict on what's limiting the link, the Mac port, the cable, or the device. For example *"Cable is limiting data speed"*, *"Device runs at 10 Gbps, this is the fastest it supports, not a cable problem"*, or *"Running slower than expected"* when the link came up degraded. Shown inline, in the CLI, and in JSON.
 - **Cable e-marker info:** the cable's actual speed (USB 2.0, 5 / 10 / 20 / 40 / 80 Gbps), current rating (3 A / 5 A up to 60W / 100W / 240W), and the chip's vendor
 - **Cable trust signals:** an orange card appears when the e-marker reports values that look unusual against the USB-PD spec, like a zero vendor ID, a reserved bit pattern in the speed / current / cable-latency fields, or a VID that isn't in USB-IF's published list. Wording is hedged on purpose: a flag means "this looks unusual," not "this cable is fake."
 - **Charger PDO list:** every voltage profile the charger advertises (5V / 9V / 12V / 15V / 20V…) with the currently negotiated profile highlighted in real time
@@ -52,9 +54,11 @@ Right-click the menu bar icon for **Refresh**, a **Keep window open** toggle (ha
 WhatCable is free and open source. If you find it useful, you can support the project by picking up [WhatCable Pro](https://whatcable.uk/pro), which unlocks extra features:
 
 - Live power metering and PD contract inspection
-- Dedicated Power Monitor window with a live system power-input graph
+- Power Monitor with a live system power-input graph
+- **Negotiation Diagnostics:** the full per-connection breakdown, what the Mac port, cable, and device each support vs what was negotiated, side by side with the weak link highlighted, plus an e-marker vs Thunderbolt-controller cross-check
 - Port health counters and cable resistance estimation
 - Pin diagrams and liquid detection status
+- Pro screens open inside the app, with an optional detach into their own window
 - Works even on Macs that don't expose live per-port metering
 
 One-time purchase, works on up to 2 Macs. See [whatcable.uk/pro](https://whatcable.uk/pro) for details.
