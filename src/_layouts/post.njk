@@ -1,0 +1,28 @@
+---
+layout: base.njk
+---
+<main>
+  <div class="wrap">
+    <p class="subtitle">
+      <a href="/blog">← Back to blog</a>
+      {% if category %} &nbsp;·&nbsp; <span>{{ category }}</span>{% endif %}
+    </p>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">
+      <time datetime="{{ page.date | isoDate }}">{{ page.date | readableDate }}</time>
+      {% if tags and tags.length > 1 %}
+        &nbsp;·&nbsp;
+        {% for t in tags %}{% if t != 'posts' %}<a href="/blog/tag/{{ t | slug }}">#{{ t }}</a> {% endif %}{% endfor %}
+      {% endif %}
+    </p>
+    <article class="post-body">
+      {{ content | safe }}
+    </article>
+    <hr>
+    <p class="subtitle">
+      Have a cable that doesn't behave the way you'd expect?
+      <a href="https://github.com/darrylmorley/whatcable/issues/new?template=cable-report.md">Report it on GitHub</a>
+      or <a href="/cables">browse the cable database</a>.
+    </p>
+  </div>
+</main>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <title>WhatCable Blog</title>
+  <subtitle>USB-C cables, Thunderbolt, and the deep weeds of port diagnostics.</subtitle>
+  <link href="https://www.whatcable.uk/blog/feed.xml" rel="self" />
+  <link href="https://www.whatcable.uk/blog" />
+  <updated>2026-05-21T00:00:00Z</updated>
+  <id>https://www.whatcable.uk/blog</id>
+  <author>
+    <name>Darryl Morley</name>
+  </author>
+  <entry>
+    <title>Hello, world</title>
+    <link href="https://www.whatcable.uk/blog/hello-world" />
+    <updated>2026-05-21T00:00:00Z</updated>
+    <id>https://www.whatcable.uk/blog/hello-world</id>
+    <content type="html">&lt;p&gt;Welcome to the WhatCable blog.&lt;/p&gt;
+&lt;p&gt;This is where I&#39;ll write about the messy, fun world underneath USB-C: why your
+fast cable charges slowly, what a Thunderbolt 5 cable actually negotiates with
+your Mac, which e-marker fields are honest and which are theatre, and the odd
+counterfeit or quirk that turns up in cable reports.&lt;/p&gt;
+&lt;h2&gt;What you&#39;ll find here&lt;/h2&gt;
+&lt;p&gt;A few rough buckets:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Releases&lt;/strong&gt;: what shipped in the latest WhatCable version, and why.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deep dives&lt;/strong&gt;: long-form pieces on the spec, the IOKit data, and how the
+app reads it.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Investigations&lt;/strong&gt;: single-cable mysteries, mostly from community reports.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Guides&lt;/strong&gt;: practical &amp;quot;how do I know if X&amp;quot; walkthroughs.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Notes&lt;/strong&gt;: short observations, dev diary entries, posts like this one.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;How to follow along&lt;/h2&gt;
+&lt;p&gt;Drop the &lt;a href=&quot;https://www.whatcable.uk/blog/feed.xml&quot;&gt;Atom feed&lt;/a&gt; into your RSS reader and you&#39;re set. No
+newsletter, no tracking, no comments. If you want to chime in, that&#39;s what
+&lt;a href=&quot;https://github.com/darrylmorley/whatcable/issues&quot;&gt;GitHub issues&lt;/a&gt; are for.&lt;/p&gt;
+</content>
+  </entry>
+</feed>

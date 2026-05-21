@@ -1,0 +1,30 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+{%- set docTitle = documentTitle or (site.name + ': ' + (title or site.tagline)) -%}
+{%- set canonicalUrl = site.url + (page.url | cleanUrl) -%}
+<title>{{ docTitle }}</title>
+<meta name="description" content="{{ description or site.description }}">
+{% if robots %}<meta name="robots" content="{{ robots }}">{% endif %}
+<link rel="canonical" href="{{ canonicalUrl }}">
+<link rel="icon" href="/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="/icon.png">
+
+<meta property="og:type" content="{{ ogType or 'website' }}">
+<meta property="og:url" content="{{ canonicalUrl }}">
+<meta property="og:title" content="{{ docTitle }}">
+<meta property="og:description" content="{{ description or site.shortDescription }}">
+<meta property="og:image" content="{{ ogImage or site.ogImage }}">
+
+<meta name="twitter:card" content="{{ twitterCard or 'summary_large_image' }}">
+<meta name="twitter:title" content="{{ docTitle }}">
+<meta name="twitter:description" content="{{ description or site.shortDescription }}">
+<meta name="twitter:image" content="{{ ogImage or site.ogImage }}">
+
+{% if feedUrl %}<link rel="alternate" type="application/atom+xml" title="{{ feedTitle }}" href="{{ feedUrl }}">{% endif %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+{% include "styles.njk" %}

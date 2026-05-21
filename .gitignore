@@ -30,3 +30,9 @@ screenshots-pro/
 # probes/test-kit/ contains the C sources bundled in the app and is tracked.
 probes/*
 !probes/test-kit/
+
+# Eleventy site tooling
+node_modules/
+
+# Local author crib sheet for the blog (gitignored by convention)
+BLOG.md
