@@ -25,69 +25,73 @@ public enum AppleSmartBatteryReader {
         }
         defer { IOObjectRelease(service) }
 
-        var props: Unmanaged<CFMutableDictionary>?
-        guard IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-              let dict = props?.takeRetainedValue() as? [String: Any] else {
-            return Result(isDesktopMac: true, federatedIdentities: [], battery: nil)
+        // Read keys individually rather than fetching the full property
+        // dictionary. The bulk fetch (IORegistryEntryCreateCFProperties)
+        // can abort the process from inside IOCFUnserializeBinary when
+        // the kernel returns a malformed serialised properties blob,
+        // typically when the service is being torn down mid-read. The
+        // per-key call has no such failure path. See issue #181.
+        func read(_ key: String) -> Any? {
+            IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
         }
 
-        let batteryInstalled = (dict["BatteryInstalled"] as? Bool) ?? false
+        let batteryInstalled = (read("BatteryInstalled") as? Bool) ?? false
         if !batteryInstalled {
             return Result(isDesktopMac: true, federatedIdentities: [], battery: nil)
         }
 
-        let fedDetails = parseFedDetails(dict["FedDetails"])
-        let battery = parseBattery(dict, federatedIdentities: fedDetails)
+        let fedDetails = parseFedDetails(read("FedDetails"))
+        let battery = parseBattery(read, federatedIdentities: fedDetails)
         return Result(isDesktopMac: false, federatedIdentities: fedDetails, battery: battery)
     }
 
-    private static func parseBattery(_ dict: [String: Any], federatedIdentities: [FederatedIdentity]) -> AppleSmartBattery {
+    private static func parseBattery(_ read: (String) -> Any?, federatedIdentities: [FederatedIdentity]) -> AppleSmartBattery {
         AppleSmartBattery(
             batteryInstalled: true,
-            deviceName: (dict["DeviceName"] as? String) ?? "",
-            serial: (dict["Serial"] as? String) ?? "",
-            designCapacity: intVal(dict["DesignCapacity"]),
-            nominalChargeCapacity: intVal(dict["NominalChargeCapacity"]),
-            designCycleCount: intVal(dict["DesignCycleCount9C"]),
-            gasGaugeFirmwareVersion: intVal(dict["GasGaugeFirmwareVersion"]),
-            currentCapacity: intVal(dict["CurrentCapacity"]),
-            maxCapacity: intVal(dict["MaxCapacity"]),
-            voltage: intVal(dict["Voltage"]),
-            amperage: intVal(dict["Amperage"]),
-            instantAmperage: intVal(dict["InstantAmperage"]),
-            temperature: intVal(dict["Temperature"]),
-            virtualTemperature: intVal(dict["VirtualTemperature"]),
-            cycleCount: intVal(dict["CycleCount"]),
-            isCharging: boolVal(dict["IsCharging"]),
-            fullyCharged: boolVal(dict["FullyCharged"]),
-            externalConnected: boolVal(dict["ExternalConnected"]),
-            externalChargeCapable: boolVal(dict["ExternalChargeCapable"]),
-            atCriticalLevel: boolVal(dict["AtCriticalLevel"]),
-            timeRemaining: intVal(dict["TimeRemaining"]),
-            avgTimeToFull: intVal(dict["AvgTimeToFull"]),
-            avgTimeToEmpty: intVal(dict["AvgTimeToEmpty"]),
-            rawCurrentCapacity: intVal(dict["AppleRawCurrentCapacity"]),
-            rawMaxCapacity: intVal(dict["AppleRawMaxCapacity"]),
-            rawBatteryVoltage: intVal(dict["AppleRawBatteryVoltage"]),
-            rawExternalConnected: boolVal(dict["AppleRawExternalConnected"]),
-            chargerConfiguration: intVal(dict["ChargerConfiguration"]),
-            packReserve: intVal(dict["PackReserve"]),
-            postChargeWaitSeconds: intVal(dict["PostChargeWaitSeconds"]),
-            postDischargeWaitSeconds: intVal(dict["PostDischargeWaitSeconds"]),
-            batteryInvalidWakeSeconds: intVal(dict["BatteryInvalidWakeSeconds"]),
-            bootVoltage: intVal(dict["BootVoltage"]),
-            permanentFailureStatus: intVal(dict["PermanentFailureStatus"]),
-            batteryCellDisconnectCount: intVal(dict["BatteryCellDisconnectCount"]),
-            updateTime: intVal(dict["UpdateTime"]),
-            fullPathUpdated: intVal(dict["FullPathUpdated"]),
-            bootPathUpdated: intVal(dict["BootPathUpdated"]),
-            userVisiblePathUpdated: intVal(dict["UserVisiblePathUpdated"]),
-            chargerData: parseChargerData(dict["ChargerData"]),
-            carrierMode: parseCarrierMode(dict["CarrierMode"]),
-            batteryShutdownReason: parseShutdownReason(dict["BatteryShutdownReason"]),
-            adapterDetails: parseAdapterDetails(dict["AdapterDetails"]),
-            powerTelemetryData: parsePowerTelemetry(dict["PowerTelemetryData"]),
-            portControllerInfo: parsePortControllerInfo(dict["PortControllerInfo"]),
+            deviceName: (read("DeviceName") as? String) ?? "",
+            serial: (read("Serial") as? String) ?? "",
+            designCapacity: intVal(read("DesignCapacity")),
+            nominalChargeCapacity: intVal(read("NominalChargeCapacity")),
+            designCycleCount: intVal(read("DesignCycleCount9C")),
+            gasGaugeFirmwareVersion: intVal(read("GasGaugeFirmwareVersion")),
+            currentCapacity: intVal(read("CurrentCapacity")),
+            maxCapacity: intVal(read("MaxCapacity")),
+            voltage: intVal(read("Voltage")),
+            amperage: intVal(read("Amperage")),
+            instantAmperage: intVal(read("InstantAmperage")),
+            temperature: intVal(read("Temperature")),
+            virtualTemperature: intVal(read("VirtualTemperature")),
+            cycleCount: intVal(read("CycleCount")),
+            isCharging: boolVal(read("IsCharging")),
+            fullyCharged: boolVal(read("FullyCharged")),
+            externalConnected: boolVal(read("ExternalConnected")),
+            externalChargeCapable: boolVal(read("ExternalChargeCapable")),
+            atCriticalLevel: boolVal(read("AtCriticalLevel")),
+            timeRemaining: intVal(read("TimeRemaining")),
+            avgTimeToFull: intVal(read("AvgTimeToFull")),
+            avgTimeToEmpty: intVal(read("AvgTimeToEmpty")),
+            rawCurrentCapacity: intVal(read("AppleRawCurrentCapacity")),
+            rawMaxCapacity: intVal(read("AppleRawMaxCapacity")),
+            rawBatteryVoltage: intVal(read("AppleRawBatteryVoltage")),
+            rawExternalConnected: boolVal(read("AppleRawExternalConnected")),
+            chargerConfiguration: intVal(read("ChargerConfiguration")),
+            packReserve: intVal(read("PackReserve")),
+            postChargeWaitSeconds: intVal(read("PostChargeWaitSeconds")),
+            postDischargeWaitSeconds: intVal(read("PostDischargeWaitSeconds")),
+            batteryInvalidWakeSeconds: intVal(read("BatteryInvalidWakeSeconds")),
+            bootVoltage: intVal(read("BootVoltage")),
+            permanentFailureStatus: intVal(read("PermanentFailureStatus")),
+            batteryCellDisconnectCount: intVal(read("BatteryCellDisconnectCount")),
+            updateTime: intVal(read("UpdateTime")),
+            fullPathUpdated: intVal(read("FullPathUpdated")),
+            bootPathUpdated: intVal(read("BootPathUpdated")),
+            userVisiblePathUpdated: intVal(read("UserVisiblePathUpdated")),
+            chargerData: parseChargerData(read("ChargerData")),
+            carrierMode: parseCarrierMode(read("CarrierMode")),
+            batteryShutdownReason: parseShutdownReason(read("BatteryShutdownReason")),
+            adapterDetails: parseAdapterDetails(read("AdapterDetails")),
+            powerTelemetryData: parsePowerTelemetry(read("PowerTelemetryData")),
+            portControllerInfo: parsePortControllerInfo(read("PortControllerInfo")),
             federatedIdentities: federatedIdentities
         )
     }
