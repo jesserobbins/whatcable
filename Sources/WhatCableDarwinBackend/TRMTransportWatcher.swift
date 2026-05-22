@@ -103,10 +103,14 @@ public final class TRMTransportWatcher: ObservableObject {
             var entryID: UInt64 = 0
             IORegistryEntryGetRegistryEntryID(service, &entryID)
 
-            var props: Unmanaged<CFMutableDictionary>?
-            guard IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-                  let dict = props?.takeRetainedValue() as? [String: Any] else {
-                continue
+            // Read keys individually rather than fetching the full property
+            // dictionary. The bulk fetch (IORegistryEntryCreateCFProperties)
+            // can abort the process from inside IOCFUnserializeBinary when
+            // the kernel returns a malformed serialised properties blob,
+            // typically when the service is being torn down mid-read. The
+            // per-key call has no such failure path. See issue #181.
+            func read(_ key: String) -> Any? {
+                IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
             }
 
             var classBuf = [CChar](repeating: 0, count: 128)
@@ -114,13 +118,13 @@ public final class TRMTransportWatcher: ObservableObject {
             let className = String(cString: classBuf)
             let transportType = Self.transportType(from: className)
 
-            if let t = makeTRMTransport(entryID: entryID, dict: dict, transportType: transportType),
+            if let t = makeTRMTransport(entryID: entryID, read: read, transportType: transportType),
                !transports.contains(where: { $0.id == t.id }) {
                 transports.append(t)
             }
 
             if transportType == "CIO",
-               let c = makeCIOCapability(entryID: entryID, dict: dict),
+               let c = makeCIOCapability(entryID: entryID, read: read),
                !cioCapabilities.contains(where: { $0.id == c.id }) {
                 cioCapabilities.append(c)
             }
@@ -137,57 +141,60 @@ public final class TRMTransportWatcher: ObservableObject {
         }
     }
 
-    private func makeTRMTransport(entryID: UInt64, dict: [String: Any], transportType: String) -> TRMTransport? {
-        let hasTRM = dict.keys.contains { $0.hasPrefix("TRM_") }
-        guard hasTRM else { return nil }
+    private func makeTRMTransport(entryID: UInt64, read: (String) -> Any?, transportType: String) -> TRMTransport? {
+        // Use TRM_State as the presence gate: it is the primary TRM field and
+        // is always published when TRM data exists. This replaces the old
+        // dict.keys.contains { $0.hasPrefix("TRM_") } check, which required
+        // the full bulk dict and cannot be reproduced with per-key reads.
+        guard read("TRM_State") != nil else { return nil }
 
-        let parent = Self.parentPortIdentity(from: dict)
+        let parent = Self.parentPortIdentity(read: read)
         let portKey = "\(parent.type)/\(parent.number)"
 
         return TRMTransport(
             id: entryID,
             portKey: portKey,
             transportType: transportType,
-            state: (dict["TRM_State"] as? NSNumber)?.intValue,
-            stateDescription: dict["TRM_StateDescription"] as? String,
-            transportRestricted: (dict["TRM_TransportRestricted"] as? NSNumber)?.boolValue,
-            transportSupervised: (dict["TRM_TransportSupervised"] as? NSNumber)?.boolValue,
-            identificationRestricted: (dict["TRM_IdentificationRestricted"] as? NSNumber)?.boolValue,
-            deviceLocked: (dict["TRM_DeviceLocked"] as? NSNumber)?.boolValue,
-            relaxedPeriod: (dict["TRM_RelaxedPeriod"] as? NSNumber)?.boolValue,
-            gracePeriodReason: (dict["TRM_GracePeriodReason"] as? NSNumber)?.intValue,
-            gracePeriodReasonDescription: dict["TRM_GracePeriodReasonDescription"] as? String,
-            profile: (dict["TRM_Profile"] as? NSNumber)?.intValue,
-            profileDescription: dict["TRM_ProfileDescription"] as? String,
-            cacheMiss: (dict["TRM_CacheMiss"] as? NSNumber)?.boolValue
+            state: (read("TRM_State") as? NSNumber)?.intValue,
+            stateDescription: read("TRM_StateDescription") as? String,
+            transportRestricted: (read("TRM_TransportRestricted") as? NSNumber)?.boolValue,
+            transportSupervised: (read("TRM_TransportSupervised") as? NSNumber)?.boolValue,
+            identificationRestricted: (read("TRM_IdentificationRestricted") as? NSNumber)?.boolValue,
+            deviceLocked: (read("TRM_DeviceLocked") as? NSNumber)?.boolValue,
+            relaxedPeriod: (read("TRM_RelaxedPeriod") as? NSNumber)?.boolValue,
+            gracePeriodReason: (read("TRM_GracePeriodReason") as? NSNumber)?.intValue,
+            gracePeriodReasonDescription: read("TRM_GracePeriodReasonDescription") as? String,
+            profile: (read("TRM_Profile") as? NSNumber)?.intValue,
+            profileDescription: read("TRM_ProfileDescription") as? String,
+            cacheMiss: (read("TRM_CacheMiss") as? NSNumber)?.boolValue
         )
     }
 
-    private func makeCIOCapability(entryID: UInt64, dict: [String: Any]) -> CIOCableCapability? {
-        let parent = Self.parentPortIdentity(from: dict)
+    private func makeCIOCapability(entryID: UInt64, read: (String) -> Any?) -> CIOCableCapability? {
+        let parent = Self.parentPortIdentity(read: read)
         let portKey = "\(parent.type)/\(parent.number)"
 
         return CIOCableCapability(
             id: entryID,
             portKey: portKey,
-            cableGeneration: (dict["CableGeneration"] as? NSNumber)?.intValue,
-            cableSpeed: (dict["CableSpeed"] as? NSNumber)?.intValue,
-            generation: (dict["Generation"] as? NSNumber)?.intValue,
-            asymmetricModeSupported: (dict["AsymmetricModeSupported"] as? NSNumber)?.boolValue,
-            legacyAdapter: (dict["LegacyAdapter"] as? NSNumber)?.boolValue,
-            linkTrainingMode: (dict["LinkTrainingMode"] as? NSNumber)?.intValue
+            cableGeneration: (read("CableGeneration") as? NSNumber)?.intValue,
+            cableSpeed: (read("CableSpeed") as? NSNumber)?.intValue,
+            generation: (read("Generation") as? NSNumber)?.intValue,
+            asymmetricModeSupported: (read("AsymmetricModeSupported") as? NSNumber)?.boolValue,
+            legacyAdapter: (read("LegacyAdapter") as? NSNumber)?.boolValue,
+            linkTrainingMode: (read("LinkTrainingMode") as? NSNumber)?.intValue
         )
     }
 
     /// Reads the parent port type and number from the service's properties.
-    /// Same approach as `USB3TransportWatcher.parentPortIdentity(from:)`.
-    nonisolated static func parentPortIdentity(from dict: [String: Any]) -> (type: Int, number: Int) {
-        let type = (dict["ParentBuiltInPortType"] as? NSNumber)?.intValue
-            ?? (dict["ParentPortType"] as? NSNumber)?.intValue
+    /// Same approach as `USB3TransportWatcher` and `PowerSourceWatcher`.
+    nonisolated static func parentPortIdentity(read: (String) -> Any?) -> (type: Int, number: Int) {
+        let type = (read("ParentBuiltInPortType") as? NSNumber)?.intValue
+            ?? (read("ParentPortType") as? NSNumber)?.intValue
             ?? 0
-        let number = (dict["ParentBuiltInPortNumber"] as? NSNumber)?.intValue
-            ?? (dict["ParentPortNumber"] as? NSNumber)?.intValue
-            ?? Int(((dict["Priority"] as? NSNumber)?.uint64Value ?? 0) & 0xFF)
+        let number = (read("ParentBuiltInPortNumber") as? NSNumber)?.intValue
+            ?? (read("ParentPortNumber") as? NSNumber)?.intValue
+            ?? Int(((read("Priority") as? NSNumber)?.uint64Value ?? 0) & 0xFF)
         return (type, number)
     }
 
