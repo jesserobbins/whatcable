@@ -197,7 +197,7 @@ struct ThunderboltLinkFromTests {
     @Test("Samsung switch parses")
     func samsungSwitchParses() {
         let model = IOThunderboltSwitch.from(
-            properties: samsungSwitch,
+            read: { self.samsungSwitch[$0] },
             className: "IOIOThunderboltSwitchType3",
             ports: []
         )
@@ -213,7 +213,7 @@ struct ThunderboltLinkFromTests {
 
     @Test("Host TB3 port parses as active TB3 link")
     func hostTb3PortParsesAsActiveTb3Link() {
-        let port = IOThunderboltPort.from(properties: hostTb3Port)
+        let port = IOThunderboltPort.from(read: { self.hostTb3Port[$0] })
         #expect(port != nil)
         #expect(port?.adapterType == .lane)
         #expect(port?.socketID == "1")
@@ -294,7 +294,7 @@ struct ThunderboltLinkFromTests {
 
     @Test("Host USB4 port detected as TB4 class")
     func hostUsb4PortDetectedAsTb4Class() {
-        let port = IOThunderboltPort.from(properties: hostUsb4Port)
+        let port = IOThunderboltPort.from(read: { self.hostUsb4Port[$0] })
         #expect(port?.currentSpeed == .usb4Tb4)
         #expect(port?.perLaneGbps == 20)
         #expect(port?.txLanes == 2)
@@ -307,8 +307,8 @@ struct ThunderboltLinkFromTests {
         // step-down to TB3 single-lane on the next leg". This test
         // confirms the model exposes everything a renderer needs to
         // produce that label. The renderer itself is Phase 3.
-        let usb4 = IOThunderboltPort.from(properties: hostUsb4Port)
-        let tb3 = IOThunderboltPort.from(properties: ts3PlusUpstreamPort)
+        let usb4 = IOThunderboltPort.from(read: { self.hostUsb4Port[$0] })
+        let tb3 = IOThunderboltPort.from(read: { self.ts3PlusUpstreamPort[$0] })
         #expect(usb4?.currentSpeed == .usb4Tb4)
         #expect(tb3?.currentSpeed == .tb3)
         // Per-lane Gbps drops on the second hop. Lane count also drops.
@@ -319,7 +319,7 @@ struct ThunderboltLinkFromTests {
     @Test("TS3 Plus switch at depth 2")
     func ts3PlusSwitchAtDepth2() {
         let model = IOThunderboltSwitch.from(
-            properties: ts3PlusSwitch,
+            read: { self.ts3PlusSwitch[$0] },
             className: "IOIOThunderboltSwitchType3",
             ports: []
         )
@@ -333,7 +333,7 @@ struct ThunderboltLinkFromTests {
         // Regression guard: IOKit reports some UIDs as signed Int64 with
         // the sign bit set. The model must store these without truncation.
         let model = IOThunderboltSwitch.from(
-            properties: asusSwitch,
+            read: { self.asusSwitch[$0] },
             className: "IOIOThunderboltSwitchIntelJHL8440",
             ports: []
         )
@@ -353,7 +353,7 @@ struct ThunderboltLinkFromTests {
             "Current Link Speed": NSNumber(value: 0),
             "Current Link Width": NSNumber(value: 0)
         ]
-        let port = IOThunderboltPort.from(properties: dict)
+        let port = IOThunderboltPort.from(read: { dict[$0] })
         #expect(port?.currentSpeed == nil)
         #expect(port?.currentWidth?.isActive == false)
         #expect((port?.hasActiveLink ?? true) == false)
@@ -369,7 +369,7 @@ struct ThunderboltLinkFromTests {
             "Port Number": NSNumber(value: 3),
             "Link Bandwidth": NSNumber(value: 60)
         ]
-        let port = IOThunderboltPort.from(properties: dict)
+        let port = IOThunderboltPort.from(read: { dict[$0] })
         #expect(port?.adapterType == .pcieDown)
         #expect(port?.currentSpeed == nil)
         #expect(port?.currentWidth == nil)
@@ -381,7 +381,7 @@ struct ThunderboltLinkFromTests {
     @Test("Switch without UID returns nil")
     func switchWithoutUidReturnsNil() {
         let model = IOThunderboltSwitch.from(
-            properties: ["Vendor ID": NSNumber(value: 1)],
+            read: { ["Vendor ID": NSNumber(value: 1)][$0] },
             className: "IOIOThunderboltSwitchType7",
             ports: []
         )
@@ -390,7 +390,7 @@ struct ThunderboltLinkFromTests {
 
     @Test("Port without port number returns nil")
     func portWithoutPortNumberReturnsNil() {
-        let port = IOThunderboltPort.from(properties: ["Adapter Type": NSNumber(value: 1)])
+        let port = IOThunderboltPort.from(read: { ["Adapter Type": NSNumber(value: 1)][$0] })
         #expect(port == nil)
     }
 }

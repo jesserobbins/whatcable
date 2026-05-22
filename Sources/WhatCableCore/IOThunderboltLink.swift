@@ -276,18 +276,18 @@ public struct IOThunderboltSwitch: Identifiable, Hashable {
     /// Lives here in `WhatCableCore` so it can be exercised against fixture
     /// data without IOKit, mirroring the `AppleHPMInterface.from(...)` pattern.
     public static func from(
-        properties: [String: Any],
+        read: (String) -> Any?,
         className: String,
         ports: [IOThunderboltPort],
         parentSwitchUID: Int64? = nil
     ) -> IOThunderboltSwitch? {
-        guard let uidNum = properties["UID"] as? NSNumber else { return nil }
-        guard let vendorIDNum = properties["Vendor ID"] as? NSNumber else { return nil }
+        guard let uidNum = read("UID") as? NSNumber else { return nil }
+        guard let vendorIDNum = read("Vendor ID") as? NSNumber else { return nil }
 
-        let speedMaskRaw = (properties["Supported Link Speed"] as? NSNumber)?.uint8Value ?? 0
+        let speedMaskRaw = (read("Supported Link Speed") as? NSNumber)?.uint8Value ?? 0
 
         let powerState: Int?
-        if let pmDict = properties["IOPowerManagement"] as? [String: Any] {
+        if let pmDict = read("IOPowerManagement") as? [String: Any] {
             powerState = (pmDict["CurrentPowerState"] as? NSNumber)?.intValue
         } else {
             powerState = nil
@@ -297,24 +297,24 @@ public struct IOThunderboltSwitch: Identifiable, Hashable {
             id: uidNum.int64Value,
             className: className,
             vendorID: vendorIDNum.intValue,
-            vendorName: (properties["Device Vendor Name"] as? String) ?? "",
-            modelName: (properties["Device Model Name"] as? String) ?? "",
-            routerID: (properties["Router ID"] as? NSNumber)?.intValue ?? 0,
-            depth: (properties["Depth"] as? NSNumber)?.intValue ?? 0,
-            routeString: (properties["Route String"] as? NSNumber)?.int64Value ?? 0,
-            upstreamPortNumber: (properties["Upstream Port Number"] as? NSNumber)?.intValue ?? 0,
-            maxPortNumber: (properties["Max Port Number"] as? NSNumber)?.intValue ?? 0,
+            vendorName: (read("Device Vendor Name") as? String) ?? "",
+            modelName: (read("Device Model Name") as? String) ?? "",
+            routerID: (read("Router ID") as? NSNumber)?.intValue ?? 0,
+            depth: (read("Depth") as? NSNumber)?.intValue ?? 0,
+            routeString: (read("Route String") as? NSNumber)?.int64Value ?? 0,
+            upstreamPortNumber: (read("Upstream Port Number") as? NSNumber)?.intValue ?? 0,
+            maxPortNumber: (read("Max Port Number") as? NSNumber)?.intValue ?? 0,
             supportedSpeed: SupportedSpeedMask(rawValue: speedMaskRaw),
             ports: ports,
             parentSwitchUID: parentSwitchUID,
-            firmwareVersion: properties["Firmware Version"] as? String,
-            thunderboltVersion: (properties["Thunderbolt Version"] as? NSNumber)?.intValue,
-            deviceID: (properties["Device ID"] as? NSNumber)?.intValue,
+            firmwareVersion: read("Firmware Version") as? String,
+            thunderboltVersion: (read("Thunderbolt Version") as? NSNumber)?.intValue,
+            deviceID: (read("Device ID") as? NSNumber)?.intValue,
             currentPowerState: powerState,
-            fwCounters: properties["FW Counters"] as? Data,
-            fwCountersRunningTotal: properties["FW Counters Running Total"] as? Data,
-            drom: properties["DROM"] as? Data,
-            minRequiredTMUMode: (properties["Min Required TMU Mode"] as? NSNumber)?.intValue
+            fwCounters: read("FW Counters") as? Data,
+            fwCountersRunningTotal: read("FW Counters Running Total") as? Data,
+            drom: read("DROM") as? Data,
+            minRequiredTMUMode: (read("Min Required TMU Mode") as? NSNumber)?.intValue
         )
     }
 
@@ -448,19 +448,19 @@ public struct IOThunderboltPort: Hashable {
     }
 
     /// Build a port from a raw IOKit property dictionary.
-    public static func from(properties: [String: Any]) -> IOThunderboltPort? {
-        guard let portNumNum = properties["Port Number"] as? NSNumber else { return nil }
-        let adapterRaw = (properties["Adapter Type"] as? NSNumber)?.uint32Value ?? 0
+    public static func from(read: (String) -> Any?) -> IOThunderboltPort? {
+        guard let portNumNum = read("Port Number") as? NSNumber else { return nil }
+        let adapterRaw = (read("Adapter Type") as? NSNumber)?.uint32Value ?? 0
         let adapter = AdapterType.from(rawValue: adapterRaw)
 
-        let socketID = properties["Socket ID"] as? String
-        let description = properties["Description"] as? String
+        let socketID = read("Socket ID") as? String
+        let description = read("Description") as? String
 
-        let speedRaw = (properties["Current Link Speed"] as? NSNumber)?.uint8Value ?? 0
-        let widthRaw = (properties["Current Link Width"] as? NSNumber)?.uint8Value ?? 0
-        let supportedWidthRaw = (properties["Supported Link Width"] as? NSNumber)?.uint8Value ?? 0
-        let targetWidthRaw = (properties["Target Link Width"] as? NSNumber)?.uint8Value ?? 0
-        let targetSpeedRaw = (properties["Target Link Speed"] as? NSNumber)?.uint8Value
+        let speedRaw = (read("Current Link Speed") as? NSNumber)?.uint8Value ?? 0
+        let widthRaw = (read("Current Link Width") as? NSNumber)?.uint8Value ?? 0
+        let supportedWidthRaw = (read("Supported Link Width") as? NSNumber)?.uint8Value ?? 0
+        let targetWidthRaw = (read("Target Link Width") as? NSNumber)?.uint8Value ?? 0
+        let targetSpeedRaw = (read("Target Link Speed") as? NSNumber)?.uint8Value
 
         let currentSpeed: LinkGeneration?
         let currentWidth: LinkWidth?
@@ -479,7 +479,7 @@ public struct IOThunderboltPort: Hashable {
         }
 
         let bufferAlloc: BufferAllocation?
-        if let bufDict = properties["Buffer Allocation Request"] as? [String: Any] {
+        if let bufDict = read("Buffer Allocation Request") as? [String: Any] {
             bufferAlloc = BufferAllocation(
                 maxUSB3: (bufDict["Max USB3"] as? NSNumber)?.intValue ?? 0,
                 maxPCIe: (bufDict["Max PCIe"] as? NSNumber)?.intValue ?? 0,
@@ -500,22 +500,22 @@ public struct IOThunderboltPort: Hashable {
             targetWidth: targetWidth,
             supportedWidth: supportedWidth,
             rawTargetSpeed: targetSpeedRaw,
-            linkBandwidthRaw: (properties["Link Bandwidth"] as? NSNumber)?.intValue,
-            maxBandwidthAllocated: (properties["Maximum Bandwidth Allocated"] as? NSNumber)?.intValue,
-            requiredBandwidthAllocated: (properties["Required Bandwidth Allocated"] as? NSNumber)?.intValue,
+            linkBandwidthRaw: (read("Link Bandwidth") as? NSNumber)?.intValue,
+            maxBandwidthAllocated: (read("Maximum Bandwidth Allocated") as? NSNumber)?.intValue,
+            requiredBandwidthAllocated: (read("Required Bandwidth Allocated") as? NSNumber)?.intValue,
             bufferAllocation: bufferAlloc,
-            maxCredits: (properties["Max Credits"] as? NSNumber)?.intValue,
-            dualLinkPort: (properties["Dual-Link Port"] as? NSNumber)?.intValue,
-            lane: (properties["Lane"] as? NSNumber)?.intValue,
-            clxState: (properties["CLx State"] as? NSNumber)?.intValue,
+            maxCredits: (read("Max Credits") as? NSNumber)?.intValue,
+            dualLinkPort: (read("Dual-Link Port") as? NSNumber)?.intValue,
+            lane: (read("Lane") as? NSNumber)?.intValue,
+            clxState: (read("CLx State") as? NSNumber)?.intValue,
             supportedSpeed: {
-                let raw = (properties["Supported Link Speed"] as? NSNumber)?.uint8Value ?? 0
+                let raw = (read("Supported Link Speed") as? NSNumber)?.uint8Value ?? 0
                 return raw != 0 ? SupportedSpeedMask(rawValue: raw) : nil
             }(),
-            trmPolicy: properties["TRM Policy"] as? String,
-            thunderboltVersion: (properties["Thunderbolt Version"] as? NSNumber)?.intValue,
-            vendorID: (properties["Vendor ID"] as? NSNumber)?.intValue,
-            deviceID: (properties["Device ID"] as? NSNumber)?.intValue
+            trmPolicy: read("TRM Policy") as? String,
+            thunderboltVersion: (read("Thunderbolt Version") as? NSNumber)?.intValue,
+            vendorID: (read("Vendor ID") as? NSNumber)?.intValue,
+            deviceID: (read("Device ID") as? NSNumber)?.intValue
         )
     }
 

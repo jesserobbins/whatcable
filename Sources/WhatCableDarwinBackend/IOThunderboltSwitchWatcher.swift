@@ -108,7 +108,10 @@ public final class IOIOThunderboltSwitchWatcher: ObservableObject {
         struct RawEntry {
             let service: io_service_t
             let className: String
-            let properties: [String: Any]
+            // UID extracted up-front so we can build the UID lookup table in
+            // the first pass without a second IOKit call. The full property
+            // read happens in the second pass via per-key reads.
+            let uid: Int64?
             let entryID: UInt64
             let parentEntryID: UInt64  // 0 if no IOIOThunderboltSwitch parent
         }
@@ -128,12 +131,19 @@ public final class IOIOThunderboltSwitchWatcher: ObservableObject {
                 className = String(cString: nameBuf)
             }
 
-            var props: Unmanaged<CFMutableDictionary>?
-            guard IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-                  let dict = props?.takeRetainedValue() as? [String: Any] else {
-                IOObjectRelease(service)
-                continue
+            // Read keys individually rather than fetching the full property
+            // dictionary. The bulk fetch (IORegistryEntryCreateCFProperties)
+            // can abort the process from inside IOCFUnserializeBinary when
+            // the kernel returns a malformed serialised properties blob,
+            // typically when the service is being torn down mid-read. The
+            // per-key call has no such failure path. See issue #181.
+            func readProp(_ key: String) -> Any? {
+                IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
             }
+            // Extract UID now so we can build the UID lookup table in the
+            // first pass. The full IOThunderboltSwitch.from(read:) call
+            // happens in the second pass while the service is still alive.
+            let uid = (readProp("UID") as? NSNumber)?.int64Value
 
             var entryID: UInt64 = 0
             IORegistryEntryGetRegistryEntryID(service, &entryID)
@@ -149,7 +159,7 @@ public final class IOIOThunderboltSwitchWatcher: ObservableObject {
             raw.append(RawEntry(
                 service: service,
                 className: className,
-                properties: dict,
+                uid: uid,
                 entryID: entryID,
                 parentEntryID: parentEntryID
             ))
@@ -159,8 +169,8 @@ public final class IOIOThunderboltSwitchWatcher: ObservableObject {
         // separate IOKit calls, unlike the raw mach-port handle.
         var uidByEntryID: [UInt64: Int64] = [:]
         for entry in raw {
-            if let uidNum = entry.properties["UID"] as? NSNumber {
-                uidByEntryID[entry.entryID] = uidNum.int64Value
+            if let uid = entry.uid {
+                uidByEntryID[entry.entryID] = uid
             }
         }
 
@@ -173,8 +183,13 @@ public final class IOIOThunderboltSwitchWatcher: ObservableObject {
                 ? uidByEntryID[entry.parentEntryID]
                 : nil
 
+            // The service is still alive here (released by the defer above
+            // after this loop finishes), so per-key reads are safe.
+            func read(_ key: String) -> Any? {
+                IORegistryEntryCreateCFProperty(entry.service, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
+            }
             if let model = IOThunderboltSwitch.from(
-                properties: entry.properties,
+                read: read,
                 className: entry.className,
                 ports: ports,
                 parentSwitchUID: parentUID
@@ -216,13 +231,10 @@ public final class IOIOThunderboltSwitchWatcher: ObservableObject {
             let className = String(cString: classBuf)
             guard className.contains("Port") else { continue }
 
-            var props: Unmanaged<CFMutableDictionary>?
-            guard IORegistryEntryCreateCFProperties(child, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-                  let dict = props?.takeRetainedValue() as? [String: Any] else {
-                continue
+            func read(_ key: String) -> Any? {
+                IORegistryEntryCreateCFProperty(child, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
             }
-
-            if let port = IOThunderboltPort.from(properties: dict) {
+            if let port = IOThunderboltPort.from(read: read) {
                 ports.append(port)
             }
         }
