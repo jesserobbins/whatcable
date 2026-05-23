@@ -203,7 +203,7 @@
 "MagSafe Charger" = "MagSafe Charger";
 "Manufacturer" = "Manufacturer";
 "Marginal" = "Marginal";
-"Max current" = "Max current";
+"Requested max operating current" = "Requested max operating current";
 "Max power" = "Max power";
 "Mitigations" = "Mitigations";
 "Mode" = "Mode";
@@ -222,7 +222,7 @@
 "No liquid detection data" = "No liquid detection data";
 "None" = "None";
 "Open Pro diagnostics for this port" = "Open Pro diagnostics for this port";
-"Operating current" = "Operating current";
+"Requested operating current" = "Requested operating current";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers.";
 "PD spec revision" = "PD spec revision";
 "PD state" = "PD state";

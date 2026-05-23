@@ -203,7 +203,7 @@
 "MagSafe Charger" = "MagSafe lādētājs";
 "Manufacturer" = "Ražotājs";
 "Marginal" = "Robežstāvoklī";
-"Max current" = "Maks. strāva";
+"Requested max operating current" = "Pieprasītā maks. darba strāva";
 "Max power" = "Maks. jauda";
 "Mitigations" = "Mazināšanas pasākumi";
 "Mode" = "Režīms";
@@ -222,7 +222,7 @@
 "No liquid detection data" = "Nav šķidruma noteikšanas datu";
 "None" = "Nav";
 "Open Pro diagnostics for this port" = "Atvērt Pro diagnostiku šim portam";
-"Operating current" = "Darba strāva";
+"Requested operating current" = "Pieprasītā darba strāva";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "PD protokola dzinēja statuss mainījies. Izseko līguma stāvokli, pilnīgo/daļējo atiestati skaitu un ziņojumu secības numurus.";
 "PD spec revision" = "PD specifikācijas versija";
 "PD state" = "PD stāvoklis";

@@ -204,7 +204,7 @@
 "MagSafe Charger" = "MagSafe լիցքավորիչ";
 "Manufacturer" = "Արտադրող";
 "Marginal" = "Սահմանային";
-"Max current" = "Առավելագույն հոսանք";
+"Requested max operating current" = "Պահանջվող առավելագույն աշխատանքային հոսանք";
 "Max power" = "Առավելագույն հզորություն";
 "Mitigations" = "Մեղմացման միջոցներ";
 "Mode" = "Ռեժիմ";
@@ -223,7 +223,7 @@
 "No liquid detection data" = "Հեղուկի հայտնաբերման տվյալներ չկան";
 "None" = "Չկա";
 "Open Pro diagnostics for this port" = "Բացել Pro ախտորոշումը այս պորտի համար";
-"Operating current" = "Աշխատանքային հոսանք";
+"Requested operating current" = "Պահանջվող աշխատանքային հոսանք";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "PD արձանագրության շարժիչի վիճակը փոխվեց: Հետևում է պայմանագրի վիճակին, կոշտ/փափուկ վերակայումների քանակին և հաղորդագրությունների հաջորդականության համարներին:";
 "PD spec revision" = "PD բնութագրի վերանայում";
 "PD state" = "PD վիճակ";

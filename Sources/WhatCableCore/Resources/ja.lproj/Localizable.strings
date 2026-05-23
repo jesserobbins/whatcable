@@ -205,7 +205,7 @@
 "MagSafe Charger" = "MagSafe充電器";
 "Manufacturer" = "製造元";
 "Marginal" = "要注意";
-"Max current" = "最大電流";
+"Requested max operating current" = "要求最大動作電流";
 "Max power" = "最大電力";
 "Mitigations" = "緩和策";
 "Mode" = "モード";
@@ -224,7 +224,7 @@
 "No liquid detection data" = "液体検出データなし";
 "None" = "なし";
 "Open Pro diagnostics for this port" = "このポートのPro診断を開く";
-"Operating current" = "動作電流";
+"Requested operating current" = "要求動作電流";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "PDプロトコルエンジンのステータスが変更。コントラクト状態、リセット回数、メッセージシーケンス番号を追跡します。";
 "PD spec revision" = "PD仕様リビジョン";
 "PD state" = "PD状態";

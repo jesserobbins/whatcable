@@ -204,7 +204,7 @@
 "MagSafe Charger" = "Cargador MagSafe";
 "Manufacturer" = "Fabricante";
 "Marginal" = "Marginal";
-"Max current" = "Corriente máx.";
+"Requested max operating current" = "Corriente operativa máxima solicitada";
 "Max power" = "Potencia máx.";
 "Mitigations" = "Mitigaciones";
 "Mode" = "Modo";
@@ -223,7 +223,7 @@
 "No liquid detection data" = "Sin datos de detección de líquido";
 "None" = "Ninguno";
 "Open Pro diagnostics for this port" = "Abrir diagnósticos Pro para este puerto";
-"Operating current" = "Corriente operativa";
+"Requested operating current" = "Corriente operativa solicitada";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "El estado del motor de protocolo PD cambió. Registra el estado del contrato, conteos de reinicio y números de secuencia.";
 "PD spec revision" = "Revisión de especificación PD";
 "PD state" = "Estado PD";

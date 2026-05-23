@@ -204,7 +204,7 @@
 "MagSafe Charger" = "MagSafe-lader";
 "Manufacturer" = "Produsent";
 "Marginal" = "Marginal";
-"Max current" = "Maks strøm";
+"Requested max operating current" = "Forespurt maks. driftsstrøm";
 "Max power" = "Maks effekt";
 "Mitigations" = "Tiltak";
 "Mode" = "Modus";
@@ -223,7 +223,7 @@
 "No liquid detection data" = "Ingen væskedeteksjonsdata";
 "None" = "Ingen";
 "Open Pro diagnostics for this port" = "Åpne Pro-diagnostikk for denne porten";
-"Operating current" = "Driftsstrøm";
+"Requested operating current" = "Forespurt driftsstrøm";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "PD-protokollmotorstatus endret. Sporer kontraktstatus, tilbakestillingsteller og meldingssekvensnumre.";
 "PD spec revision" = "PD-spesifikasjonsrevisjon";
 "PD state" = "PD-status";

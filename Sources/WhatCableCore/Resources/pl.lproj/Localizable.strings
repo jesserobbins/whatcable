@@ -203,7 +203,7 @@
 "MagSafe Charger" = "Ładowarka MagSafe";
 "Manufacturer" = "Producent";
 "Marginal" = "Graniczny";
-"Max current" = "Maks. prąd";
+"Requested max operating current" = "Żądany maks. prąd roboczy";
 "Max power" = "Maks. moc";
 "Mitigations" = "Środki zaradcze";
 "Mode" = "Tryb";
@@ -222,7 +222,7 @@
 "No liquid detection data" = "Brak danych wykrywania cieczy";
 "None" = "Brak";
 "Open Pro diagnostics for this port" = "Otwórz diagnostykę Pro dla tego portu";
-"Operating current" = "Prąd roboczy";
+"Requested operating current" = "Żądany prąd roboczy";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "Zmienił się stan silnika protokołu PD. Śledzi stan kontraktu, liczby twardych/miękkich resetów i numery sekwencji wiadomości.";
 "PD spec revision" = "Wersja specyfikacji PD";
 "PD state" = "Stan PD";

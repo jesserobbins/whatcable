@@ -204,7 +204,7 @@
 "MagSafe Charger" = "MagSafe 充電器";
 "Manufacturer" = "製造商";
 "Marginal" = "勉強可用";
-"Max current" = "最大電流";
+"Requested max operating current" = "請求最大運作電流";
 "Max power" = "最大功率";
 "Mitigations" = "緩解措施";
 "Mode" = "模式";
@@ -223,7 +223,7 @@
 "No liquid detection data" = "沒有液體偵測資料";
 "None" = "無";
 "Open Pro diagnostics for this port" = "開啟此連接埠的 Pro 診斷";
-"Operating current" = "運作電流";
+"Requested operating current" = "請求運作電流";
 "PD protocol engine status changed. Tracks contract state, hard/soft reset counts, and message sequence numbers." = "PD 協定引擎狀態已變更。追蹤合約狀態、硬/軟重置次數和訊息序號。";
 "PD spec revision" = "PD 規範版本";
 "PD state" = "PD 狀態";
