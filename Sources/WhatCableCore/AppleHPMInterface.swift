@@ -203,6 +203,19 @@ public struct AppleHPMInterface: Identifiable, Hashable {
         return DisplayPortLaneConfig(rawValue: raw)
     }
 
+    /// True when this port can host a data link (USB or Thunderbolt).
+    /// MagSafe and any other power-only port returns false. Source of
+    /// truth for "should we attempt to correlate this port to a TB
+    /// switch lane". The `@N` socket suffix on a power-only port can
+    /// collide with the first USB-C port on the same HPM controller
+    /// (issue #195, universal across M-class chips); gating any
+    /// topology lookup on this property is what keeps that collision
+    /// from leaking USB-C lane state onto power-only ports.
+    public var carriesData: Bool {
+        let dataTransports: Set<String> = ["USB2", "USB3", "USB4", "CIO", "DisplayPort"]
+        return transportsSupported.contains(where: dataTransports.contains)
+    }
+
     public func matchingDevices(from devices: [USBDevice]) -> [USBDevice] {
         guard connectionActive == true else { return [] }
 

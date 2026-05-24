@@ -8,20 +8,26 @@ struct DataLinkDiagnosticTests {
 
     /// Active USB-C port. Same shape as the ChargingDiagnostic fixture
     /// (the proven-compiling AppleHPMInterface init param list).
-    /// `transportsActive` defaults to `["USB3"]` because most tests in
-    /// this suite exercise a USB3 link via `usb3Transports`. Tests that
-    /// hand-roll TB or USB2-only scenarios override it.
+    /// `transportsActive` defaults to `["CC", "USB3", "CIO"]` so the
+    /// fixture exercises the TB-aware paths by default; tests that
+    /// hand-roll USB3-only or USB2-only scenarios override it.
+    /// `transportsSupported` mirrors a real M-class USB-C port (matters
+    /// for the `carriesData` gate added in the issue #195 fix); MagSafe
+    /// shape tests override it to `[]`.
     private func makePort(
         active: Bool = true,
-        transportsActive: [String] = ["USB3"],
+        transportsActive: [String] = ["CC", "USB3", "CIO"],
+        transportsSupported: [String] = ["CC", "USB2", "USB3", "CIO", "DisplayPort"],
+        serviceName: String = "Port-USB-C@1",
+        portTypeDescription: String? = "USB-C",
         superSpeedActive: Bool? = nil
     ) -> AppleHPMInterface {
         AppleHPMInterface(
             id: 1,
-            serviceName: "Port-USB-C@1",
+            serviceName: serviceName,
             className: "AppleHPMInterfaceType10",
             portDescription: nil,
-            portTypeDescription: "USB-C",
+            portTypeDescription: portTypeDescription,
             portNumber: 1,
             connectionActive: active,
             activeCable: nil,
@@ -30,7 +36,7 @@ struct DataLinkDiagnosticTests {
             superSpeedActive: superSpeedActive,
             usbModeType: nil,
             usbConnectString: nil,
-            transportsSupported: [],
+            transportsSupported: transportsSupported,
             transportsActive: transportsActive,
             transportsProvisioned: [],
             plugOrientation: nil,
@@ -115,6 +121,128 @@ struct DataLinkDiagnosticTests {
             tbActiveGbps: nil              // no TB link
         )
         #expect(diag == nil)
+    }
+
+    @Test("Returns nil for a power-only MagSafe port (issue #195)")
+    func returnsNilForMagSafePort() {
+        // M2 MacBook Air shape from issue #195: MagSafe and the first
+        // USB-C port share the same HPM controller die and therefore the
+        // controller-local `@1` socket suffix. Empty `transportsSupported`
+        // is the exclusive capability signal for "power-only port"; the
+        // diagnostic now refuses to verdict on it. Without the gate the
+        // host-max inference would attribute USB-C@1's 40 Gbps lane mask
+        // to MagSafe and produce a confident "Running at full data speed
+        // (40 Gbps)" verdict.
+        let host = hostSwitch(socketID: "1", supportedRaw: 0xC, activeSpeed: .usb4Tb4)
+        let diag = DataLinkDiagnostic(
+            port: makePort(
+                transportsActive: ["CC"],
+                transportsSupported: [],
+                serviceName: "Port-MagSafe 3@1",
+                portTypeDescription: "MagSafe 3"
+            ),
+            identities: [],
+            devices: [],
+            usb3Transports: [],
+            cio: nil,
+            thunderboltSwitches: [host]
+        )
+        #expect(diag == nil)
+    }
+
+    @Test("Within-controller socket-ID collision: USB-C verdicts, MagSafe abstains")
+    func withinControllerCollision() {
+        // The exact shape that the #159 verification pass missed: a
+        // MagSafe and a USB-C port on the same controller, sharing the
+        // `@1` socket suffix. The USB-C port must still get a real
+        // verdict; the MagSafe port must abstain. The host TB switch is
+        // shared (one root, one lane port at socket "1").
+        let host = hostSwitch(socketID: "1", supportedRaw: 0xC, activeSpeed: .usb4Tb4)
+
+        let usbC = makePort(
+            transportsActive: ["CC", "USB3", "CIO"],
+            serviceName: "Port-USB-C@1"
+        )
+        let magSafe = makePort(
+            transportsActive: ["CC"],
+            transportsSupported: [],
+            serviceName: "Port-MagSafe 3@1",
+            portTypeDescription: "MagSafe 3"
+        )
+
+        let usbDiag = DataLinkDiagnostic(
+            port: usbC,
+            identities: [cableEmarker(speedCode: 3)],   // 40 Gbps
+            devices: [],
+            usb3Transports: [],
+            cio: nil,
+            thunderboltSwitches: [host]
+        )
+        let magSafeDiag = DataLinkDiagnostic(
+            port: magSafe,
+            identities: [],
+            devices: [],
+            usb3Transports: [],
+            cio: nil,
+            thunderboltSwitches: [host]
+        )
+        #expect(usbDiag != nil,
+            "USB-C port must still get a verdict despite sharing its socket suffix with MagSafe")
+        #expect(magSafeDiag == nil,
+            "MagSafe must abstain even when a usable TB switch exists for its colliding socket suffix")
+    }
+
+    @Test("USB 2.0 cable on a USB-C port returns nil without a real active rate")
+    func usb2CableNoActiveRate() {
+        // bigskookum's shape (issue #195 follow-up): a USB-C port holds
+        // a USB 2.0 cable. `transportsActive` does not contain CIO or
+        // USB3, so the TB lookup (which on Apple Silicon reads the
+        // always-up internal root lane) is now gated off, and no USB3
+        // signaling is available. With no honest active rate, the
+        // diagnostic abstains rather than reading 40 Gbps off the
+        // internal lane. The cable badge from PortSummary still
+        // surfaces the USB 2.0 reading separately.
+        let host = hostSwitch(socketID: "1", supportedRaw: 0xC, activeSpeed: .usb4Tb4)
+        let diag = DataLinkDiagnostic(
+            port: makePort(
+                transportsActive: ["CC", "USB2"],         // USB 2.0 cable only
+                transportsSupported: ["CC", "USB2", "USB3", "CIO", "DisplayPort"]
+            ),
+            identities: [cableEmarker(speedCode: 0)],    // USB 2.0 e-marker
+            devices: [],
+            usb3Transports: [],
+            cio: nil,
+            thunderboltSwitches: [host]
+        )
+        #expect(diag == nil,
+            "A USB 2.0-only link should not pick up a Thunderbolt active rate from the always-up internal lane")
+    }
+
+    @Test("Cable contradicts active rate when no CIO tiebreak (Change B)")
+    func cableContradictsActive() {
+        // Synthetic case: e-marker says USB 2.0, the link reads 40 Gbps,
+        // no CIO. With the old floor, cable would be promoted to 40 and
+        // the verdict would say "Running at full data speed". The new
+        // behaviour surfaces both numbers and asks the user to swap the
+        // cable to resolve the contradiction.
+        let diag = DataLinkDiagnostic(
+            port: makePort(transportsActive: ["CC", "USB3", "CIO"]),
+            identities: [cableEmarker(speedCode: 0)],    // USB 2.0 (0.48)
+            devices: [],
+            usb3Transports: [],
+            cio: nil,
+            tbActiveGbps: 40,
+            hostMaxGbps: 40
+        )
+        guard case .cableContradictsActive(let cableGbps, let activeGbps) = diag?.bottleneck else {
+            Issue.record("expected .cableContradictsActive, got \(String(describing: diag?.bottleneck))")
+            return
+        }
+        #expect(cableGbps == 0.48)
+        #expect(activeGbps == 40)
+        #expect(diag!.isWarning)
+        #expect(diag!.facts.cableGbps == 0.48,
+            "Facts must reflect the cable's actual claim, not the silently-promoted active rate")
     }
 
     // MARK: - Bottleneck attribution

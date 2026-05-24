@@ -513,7 +513,7 @@ struct PortCard: View {
     /// Switches in the chain from this port's host root to the deepest
     /// connected device. Empty if the port doesn't map to any TB switch.
     var thunderboltChain: [IOThunderboltSwitch] {
-        guard let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
+        guard let socketID = ThunderboltTopology.socketID(for: port),
               let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: thunderboltSwitches) else {
             return []
         }

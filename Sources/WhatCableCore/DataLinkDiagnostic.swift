@@ -29,6 +29,15 @@ public struct DataLinkDiagnostic {
         /// No e-marker and no controller data, so we cannot say whether the
         /// cable is the limit. Stated plainly rather than guessed.
         case unknownCable(activeGbps: Double)
+        /// The cable's e-marker reports a speed meaningfully below the
+        /// link's apparent active rate, and there is no controller (CIO)
+        /// reading to break the tie. One of the two signals is wrong; we
+        /// surface both numbers rather than silently picking a side
+        /// (issue #195 follow-up: the old defence-in-depth floor would
+        /// promote the cable to the active rate, which masked
+        /// legitimately slow cables whenever the active reading was
+        /// itself unreliable).
+        case cableContradictsActive(cableGbps: Double, activeGbps: Double)
     }
 
     public let bottleneck: Bottleneck
@@ -43,7 +52,7 @@ public struct DataLinkDiagnostic {
     public var isWarning: Bool {
         switch bottleneck {
         case .fine, .deviceLimit, .unknownCable: return false
-        case .cableLimit, .hostLimit, .degraded: return true
+        case .cableLimit, .hostLimit, .degraded, .cableContradictsActive: return true
         }
     }
 
@@ -126,6 +135,13 @@ extension DataLinkDiagnostic {
         // expose stale link state. Don't diagnose a port that isn't live.
         guard port.connectionActive == true else { return nil }
 
+        // Defence-in-depth (issue #195): refuse the diagnostic on any
+        // port that can't host a data link, even if every downstream
+        // socket-ID lookup is correctly gated. A future regression that
+        // re-introduces an un-gated TB topology lookup would still be
+        // caught here. Belt and braces against the same class of bug.
+        guard port.carriesData else { return nil }
+
         // Pick the port's USB 3 transport (portKey is the correlation key;
         // fall back to the only entry if the caller pre-filtered). Only
         // trust the transport's speed when USB3 is in `TransportsActive`:
@@ -156,14 +172,24 @@ extension DataLinkDiagnostic {
         // guess (mirrors CIOCableCapability.speedLabel's conservatism).
         let cioGbps = Self.cioCableGbps(cio?.cableSpeed)
 
-        // When both signals exist and disagree across tiers, the controller
-        // is authoritative either way. The original case (issue #111) was an
-        // active TB4 cable e-marker that under-reported as "passive low
-        // speed" while the controller correctly showed 40. Issue #190 was
-        // the inverse: a suspect cable (zero VID) over-reported as 80 while
-        // the controller showed 40. In both cases the controller's reading
-        // is the trustworthy one, so resolve the disagreement to CIO rather
-        // than taking the higher figure.
+        // When both signals exist and disagree across tiers, use the
+        // active link rate as the tiebreak. Three real cases:
+        //   - #111: e-marker reports "passive low speed", CIO says 40,
+        //     active 40. Active matches CIO. → CIO wins, conflict noted.
+        //   - #190: e-marker reports 80 (suspect zero-VID cable lying
+        //     high), CIO says 40, active 40. Active matches CIO. → CIO
+        //     wins, conflict noted.
+        //   - stale CIO (hypothetical but worth guarding): e-marker
+        //     reports 80, CIO says 40 (stale), active 80. Active matches
+        //     e-marker. → e-marker wins, conflict noted.
+        //   - no tiebreak available: neither matches active (or active
+        //     is itself uncertain). CIO wins by default; the controller
+        //     reading is the more authoritative source absent other
+        //     evidence.
+        // This subsumes the older "promote cable to active" floor
+        // (issue #195 follow-up): the floor was a corrective for the
+        // stale-CIO case, now folded into the resolution rather than
+        // applied silently afterwards.
         let conflict: Bool
         let cableMaxGbps: Double?
         switch (emarkerGbps, cioGbps) {
@@ -173,7 +199,11 @@ extension DataLinkDiagnostic {
                 cableMaxGbps = max(e, c)
             } else {
                 conflict = true
-                cableMaxGbps = c
+                if Self.sameTier(e, active) {
+                    cableMaxGbps = e
+                } else {
+                    cableMaxGbps = c
+                }
             }
         case let (e?, nil):
             conflict = false
@@ -185,20 +215,27 @@ extension DataLinkDiagnostic {
             conflict = false
             cableMaxGbps = nil
         }
-        // Sanity floor: the cable must be able to carry whatever speed the
-        // link is *actually* running at; otherwise the link could not have
-        // negotiated. If our resolved cable cap is meaningfully below the
-        // active rate (e.g. a controller cableSpeed=3 reading on a TB5
-        // cable due to a firmware quirk, with the e-marker correctly
-        // saying 80 and the link running at 80), the resolved value is
-        // suspect, not the active link. Promote to the active rate so the
-        // verdict layer never claims "cable carries N" while the link is
-        // empirically running faster.
-        let cableFloored: Double?
-        if let c = cableMaxGbps, c < active, !Self.sameTier(c, active) {
-            cableFloored = active
+        // Cable / active-rate contradiction detection. When the resolved
+        // cable speed is meaningfully below the active rate, one of the
+        // two signals is wrong. The earlier silent promotion (issue #195
+        // follow-up) assumed the cable e-marker must be the wrong one,
+        // which masked legitimate slow cables whenever the active reading
+        // was itself unreliable (e.g. a topology leak before the per-port
+        // gating in this commit, or any future leak we miss). The honest
+        // answer is to surface the contradiction.
+        //
+        // CIO-confirmed cases are already resolved upstream: the e-marker
+        // vs CIO step picks CIO unconditionally on a cross-tier
+        // disagreement, so by the time we get here `cableMaxGbps` is the
+        // controller's number on those cases and the contradiction check
+        // does not fire. The remaining contradictions are exactly the
+        // ones where only the e-marker is available and it disagrees
+        // with the active reading by more than a tier.
+        let cableContradiction: Bool
+        if let c = cableMaxGbps, c < active, !Self.sameTier(c, active), cioGbps == nil {
+            cableContradiction = true
         } else {
-            cableFloored = cableMaxGbps
+            cableContradiction = false
         }
         self.cableSignalConflict = conflict
 
@@ -234,7 +271,7 @@ extension DataLinkDiagnostic {
             hostGbps: resolvedHostMaxGbps,
             cableEmarkerGbps: emarkerGbps,
             cableControllerGbps: cioGbps,
-            cableGbps: cableFloored,
+            cableGbps: cableMaxGbps,
             deviceGbps: deviceMaxGbps,
             activeGbps: active
         )
@@ -243,10 +280,22 @@ extension DataLinkDiagnostic {
             ? " " + String(localized: "The cable's e-marker and the Thunderbolt controller disagree on its speed; the controller's reading is treated as authoritative.", bundle: _coreLocalizedBundle)
             : ""
 
+        // Cable / active-rate contradiction short-circuit. When the
+        // e-marker claims a speed meaningfully below the active rate and
+        // CIO is not available to break the tie, report the contradiction
+        // honestly rather than picking a side. Trying a known-good cable
+        // is the only reliable way for the user to resolve it.
+        if cableContradiction, let cableClaim = cableMaxGbps {
+            self.bottleneck = .cableContradictsActive(cableGbps: cableClaim, activeGbps: active)
+            self.summary = String(localized: "Cable says \(Self.label(cableClaim)), link reads \(Self.label(active))", bundle: _coreLocalizedBundle)
+            self.detail = String(localized: "The cable's e-marker reports \(Self.label(cableClaim)), but the active link is reading \(Self.label(active)). One of those readings is wrong, and without a Thunderbolt controller cross-check we can't tell which. Trying a known-good cable will identify the culprit.", bundle: _coreLocalizedBundle)
+            return
+        }
+
         // Every capability we actually know about, tagged by party. The
         // link can never run faster than the slowest of these.
         var caps: [(party: String, value: Double)] = []
-        if let c = cableFloored         { caps.append((party: "cable",  value: c)) }
+        if let c = cableMaxGbps         { caps.append((party: "cable",  value: c)) }
         if let h = resolvedHostMaxGbps  { caps.append((party: "host",   value: h)) }
         if let d = deviceMaxGbps        { caps.append((party: "device", value: d)) }
 
@@ -265,7 +314,7 @@ extension DataLinkDiagnostic {
             // unidentified degraded it. If the cable is the unknown, it's
             // the honest suspect; otherwise it's an unattributed degrade.
             // Either way, never claim "full speed" here (the old draft bug).
-            if cableFloored == nil {
+            if cableMaxGbps == nil {
                 self.bottleneck = .unknownCable(activeGbps: active)
                 self.summary = String(localized: "Running at \(Self.label(active))", bundle: _coreLocalizedBundle)
                 self.detail = String(localized: "This cable has no e-marker and no controller data, so we can't tell whether it is the limit.", bundle: _coreLocalizedBundle)
@@ -326,12 +375,22 @@ extension DataLinkDiagnostic {
     /// `PortSummary` uses (socket-ID match -> host root -> active
     /// downstream lane port). Returns `nil` when the port isn't on a TB
     /// link or no link is up.
+    ///
+    /// Gated on `transportsActive.contains("CIO")`: on Apple Silicon the
+    /// internal root-to-downstream-switch lane is always reported as
+    /// active even when no user cable is plugged in, so reading the lane
+    /// state without a "this port is actually carrying TB" signal would
+    /// attribute internal-link speed to the user's cable (issue #195
+    /// follow-up: this is what produced the "40 Gbps" reading on a port
+    /// holding a USB 2.0 cable). CIO in `transportsActive` is the
+    /// authoritative "the user's cable is doing Thunderbolt" signal.
     static func activeTBGbps(
         port: AppleHPMInterface,
         switches: [IOThunderboltSwitch]
     ) -> Double? {
-        guard !switches.isEmpty,
-              let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
+        guard port.transportsActive.contains("CIO"),
+              !switches.isEmpty,
+              let socketID = ThunderboltTopology.socketID(for: port),
               let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: switches),
               let hostPort = ThunderboltTopology.activeDownstreamLanePort(root),
               let gen = hostPort.currentSpeed else {
@@ -357,7 +416,7 @@ extension DataLinkDiagnostic {
         switches: [IOThunderboltSwitch]
     ) -> Double? {
         guard !switches.isEmpty,
-              let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
+              let socketID = ThunderboltTopology.socketID(for: port),
               let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: switches) else {
             return nil
         }
@@ -389,7 +448,7 @@ extension DataLinkDiagnostic {
         switches: [IOThunderboltSwitch]
     ) -> IOThunderboltSwitch? {
         guard !switches.isEmpty,
-              let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
+              let socketID = ThunderboltTopology.socketID(for: port),
               let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: switches),
               let hostLanePort = root.ports.first(where: {
                   $0.adapterType.isLane && $0.socketID == socketID

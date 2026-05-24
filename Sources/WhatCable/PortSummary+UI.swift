@@ -45,6 +45,7 @@ extension DataLinkDiagnostic {
         case .cableLimit: return "exclamationmark.triangle.fill"
         case .hostLimit: return "exclamationmark.triangle.fill"
         case .degraded: return "exclamationmark.triangle.fill"
+        case .cableContradictsActive: return "exclamationmark.triangle.fill"
         case .deviceLimit: return "info.circle"
         case .unknownCable: return "questionmark.circle"
         case .fine: return "checkmark.seal.fill"

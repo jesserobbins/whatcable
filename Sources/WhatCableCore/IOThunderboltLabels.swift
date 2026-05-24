@@ -78,11 +78,24 @@ public enum ThunderboltTopology {
     }
 
     /// Parse the trailing `@N` suffix from a port serviceName, or nil if
-    /// it doesn't have one. `Port-USB-C@1` → `"1"`.
+    /// it doesn't have one. `Port-USB-C@1` → `"1"`. Pure parser, kept
+    /// public for parser-level unit tests; **production callers must use
+    /// `socketID(for:)` instead** so the data-capability gate runs.
     public static func socketID(fromServiceName name: String) -> String? {
         guard let at = name.lastIndex(of: "@") else { return nil }
         let suffix = name[name.index(after: at)...]
         return suffix.isEmpty ? nil : String(suffix)
+    }
+
+    /// The TB host-root socket ID for this port, or `nil` when this port
+    /// can't host a data link. Power-only ports (MagSafe) share an `@N`
+    /// suffix with the first USB-C port on the same HPM controller
+    /// (issue #195), so attempting a topology lookup on them leaks the
+    /// neighbouring USB-C port's lane state. Gating on `carriesData`
+    /// keeps every TB-graph consumer honest at the entry point.
+    public static func socketID(for port: AppleHPMInterface) -> String? {
+        guard port.carriesData else { return nil }
+        return socketID(fromServiceName: port.serviceName)
     }
 
     /// Return the chain of downstream switches reachable from a host root,

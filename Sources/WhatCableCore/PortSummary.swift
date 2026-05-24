@@ -466,7 +466,7 @@ private func thunderboltBullets(
     switches: [IOThunderboltSwitch]
 ) -> [String] {
     guard !switches.isEmpty,
-          let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
+          let socketID = ThunderboltTopology.socketID(for: port),
           let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: switches) else {
         return []
     }

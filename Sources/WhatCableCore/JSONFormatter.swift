@@ -140,7 +140,7 @@ private struct PortDTO: Codable {
         self.bullets = summary.bullets
 
         // Resolve the host-root switch UID via Socket ID matching.
-        if let socketID = ThunderboltTopology.socketID(fromServiceName: port.serviceName),
+        if let socketID = ThunderboltTopology.socketID(for: port),
            let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: thunderboltSwitches) {
             self.thunderboltSwitchUID = root.id
         } else {
@@ -537,6 +537,7 @@ private struct DataLinkDTO: Codable {
         case .deviceLimit: self.bottleneck = "deviceLimit"
         case .degraded: self.bottleneck = "degraded"
         case .unknownCable: self.bottleneck = "unknownCable"
+        case .cableContradictsActive: self.bottleneck = "cableContradictsActive"
         }
     }
 }
