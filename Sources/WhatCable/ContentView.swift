@@ -580,7 +580,7 @@ struct PortCard: View {
             if !devices.isEmpty {
                 let tree = USBDeviceNode.flatten(USBDeviceNode.buildTree(from: devices))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(String(localized: "Connected devices", bundle: _appLocalizedBundle))
+                    Text(String(localized: "Connected devices:", bundle: _appLocalizedBundle))
                         .scaledFont(.caption).foregroundStyle(.secondary)
                     ForEach(tree) { node in
                         let name = node.device.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
