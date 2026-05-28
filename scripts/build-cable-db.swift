@@ -80,6 +80,7 @@ func createSchema() {
 
     runSQL("""
         CREATE TABLE cables (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
             vid       INTEGER NOT NULL,
             pid       INTEGER NOT NULL,
             cable_vdo INTEGER NOT NULL DEFAULT 0,
@@ -88,10 +89,11 @@ func createSchema() {
             power     TEXT NOT NULL DEFAULT '',
             type      TEXT NOT NULL DEFAULT 'passive',
             xid       TEXT NOT NULL DEFAULT 'none',
-            issue_url TEXT NOT NULL DEFAULT '',
-            PRIMARY KEY (vid, pid, cable_vdo)
+            issue_url TEXT NOT NULL DEFAULT ''
         )
         """)
+
+    runSQL("CREATE INDEX idx_cables_fingerprint ON cables(vid, pid, cable_vdo)")
 }
 
 // MARK: - USB-IF vendor import
@@ -235,24 +237,21 @@ private struct CableRow {
     let issueURL: String
 }
 
-private struct CableRowKey: Hashable {
-    let vid: Int
-    let pid: Int
-    let cableVDO: Int
-}
-
 func importKnownCables() -> Int {
     guard let text = try? String(contentsOfFile: knownCablesMD, encoding: .utf8) else {
         fputs("warn: could not read \(knownCablesMD), skipping cables\n", stderr)
         return 0
     }
 
-    // Pass 1: parse all valid markdown rows into a flat list. We
-    // group by (vid, pid, cable_vdo) below before inserting, because
-    // INSERT OR REPLACE used to silently drop rows when a fingerprint
-    // was shared by multiple reports (see issue #161 secondary finding).
+    // Parse all valid markdown rows into a flat list, then insert each
+    // row directly. No merging: each row from the markdown becomes one
+    // DB row. The fingerprint index (idx_cables_fingerprint) lets
+    // CableDB look up all rows for a given (vid, pid, cable_vdo).
     var parsed: [CableRow] = []
+    var skippedNeedsReview = 0
+    var skippedAllZero = 0
     var inTable = false
+
     for line in text.components(separatedBy: "\n") {
         if line.hasPrefix("## Table") { inTable = true; continue }
         if inTable, line.hasPrefix("## ") { break }
@@ -267,12 +266,23 @@ func importKnownCables() -> Int {
         guard parts[1].hasPrefix("`0x") else { continue }
 
         let brand = parts[0]
-        // Skip "(needs review)" rows
-        if brand == "(needs review)" { continue }
+        // Skip "(needs review)" rows - they have no usable brand context yet.
+        if brand == "(needs review)" {
+            skippedNeedsReview += 1
+            continue
+        }
 
         guard let vid = parseHex(parts[1]),
               let pid = parseHex(parts[2]) else { continue }
         let cableVDO = parseHex(parts[3]) ?? 0
+
+        // All-zero fingerprint carries no identifying bits; CableDB.curatedCable
+        // refuses it at lookup time, so there's no point storing it.
+        if vid == 0 && pid == 0 && cableVDO == 0 {
+            skippedAllZero += 1
+            continue
+        }
+
         let xid = parts[5].replacingOccurrences(of: "`", with: "")
         let speed = parts[6]
         let power = parts[7]
@@ -293,21 +303,22 @@ func importKnownCables() -> Int {
         ))
     }
 
-    // Pass 2: group by fingerprint. Multiple reports of the same
-    // (vid, pid, cable_vdo) are merged into one DB row with brand
-    // strings joined by "; " and issue URLs joined by ", ". This
-    // keeps the markdown one-row-per-issue (so the sync script stays
-    // simple) while producing one honest DB row per fingerprint.
-    //
-    // The all-zero key (0, 0, 0) is dropped entirely: it carries no
-    // identifying bits, CableDB.curatedCable refuses it at lookup
-    // time, and writing it to the DB only wastes a slot.
-    var grouped: [CableRowKey: [CableRow]] = [:]
-    var insertOrder: [CableRowKey] = []
+    if skippedNeedsReview > 0 {
+        print("warn: skipped \(skippedNeedsReview) row(s) with '(needs review)' brand - hand-edit before next build")
+    }
+    if skippedAllZero > 0 {
+        print("Skipped \(skippedAllZero) all-zero-fingerprint markdown row(s) (cannot identify a cable)")
+    }
+
+    // Count shared fingerprints for informational output only.
+    var fingerprintCounts: [String: Int] = [:]
     for row in parsed {
-        let key = CableRowKey(vid: row.vid, pid: row.pid, cableVDO: row.cableVDO)
-        if grouped[key] == nil { insertOrder.append(key) }
-        grouped[key, default: []].append(row)
+        let key = "\(row.vid):\(row.pid):\(row.cableVDO)"
+        fingerprintCounts[key, default: 0] += 1
+    }
+    let sharedCount = fingerprintCounts.values.filter { $0 > 1 }.count
+    if sharedCount > 0 {
+        print("note: \(sharedCount) fingerprint(s) shared by multiple rows (each row will be inserted separately)")
     }
 
     let insertSQL = """
@@ -322,35 +333,8 @@ func importKnownCables() -> Int {
 
     runSQL("BEGIN TRANSACTION")
     var count = 0
-    var mergedGroups = 0
-    var skippedAllZero = 0
 
-    for key in insertOrder {
-        let rows = grouped[key]!
-        if key.vid == 0 && key.pid == 0 && key.cableVDO == 0 {
-            skippedAllZero += rows.count
-            continue
-        }
-
-        let row: CableRow
-        if rows.count == 1 {
-            row = rows[0]
-        } else {
-            let mergedBrand = rows.map { $0.brand }.joined(separator: "; ")
-            let mergedURLs = rows.map { $0.issueURL }.joined(separator: ", ")
-            let first = rows[0]
-            row = CableRow(
-                vid: key.vid, pid: key.pid, cableVDO: key.cableVDO,
-                brand: mergedBrand, speed: first.speed, power: first.power,
-                type: first.type, xid: first.xid, issueURL: mergedURLs
-            )
-            mergedGroups += 1
-            let vidStr = String(format: "0x%04X", key.vid)
-            let pidStr = String(format: "0x%04X", key.pid)
-            let vdoStr = String(format: "0x%08X", key.cableVDO)
-            print("note: merged \(rows.count) reports on (\(vidStr), \(pidStr), \(vdoStr)) -> \(mergedBrand)")
-        }
-
+    for row in parsed {
         sqlite3_reset(stmt)
         sqlite3_bind_int(stmt, 1, Int32(row.vid))
         sqlite3_bind_int(stmt, 2, Int32(row.pid))
@@ -371,13 +355,6 @@ func importKnownCables() -> Int {
 
     runSQL("COMMIT")
     sqlite3_finalize(stmt)
-
-    if mergedGroups > 0 {
-        print("Merged \(mergedGroups) fingerprint group(s) with multiple reports")
-    }
-    if skippedAllZero > 0 {
-        print("Skipped \(skippedAllZero) all-zero-fingerprint markdown row(s) (cannot identify a cable)")
-    }
     return count
 }
 
@@ -489,6 +466,62 @@ print("usb.ids: \(usbids.inserted) new vendors added, \(usbids.skipped) already 
 
 let cableCount = importKnownCables()
 print("Imported \(cableCount) known cables")
+
+// Build-time invariant checks: warn on inconsistent speed/power within shared fingerprints.
+let consistencyQuery = """
+    SELECT vid, pid, cable_vdo, COUNT(DISTINCT speed) as speeds, COUNT(DISTINCT power) as powers
+    FROM cables
+    GROUP BY vid, pid, cable_vdo
+    HAVING speeds > 1 OR powers > 1
+    """
+var checkStmt: OpaquePointer?
+if sqlite3_prepare_v2(db, consistencyQuery, -1, &checkStmt, nil) == SQLITE_OK {
+    while sqlite3_step(checkStmt) == SQLITE_ROW {
+        let vid = Int(sqlite3_column_int(checkStmt, 0))
+        let pid = Int(sqlite3_column_int(checkStmt, 1))
+        let cableVDO = Int(sqlite3_column_int(checkStmt, 2))
+        let speeds = Int(sqlite3_column_int(checkStmt, 3))
+        let powers = Int(sqlite3_column_int(checkStmt, 4))
+        let vidStr = String(format: "0x%04X", vid)
+        let pidStr = String(format: "0x%04X", pid)
+        let vdoStr = String(format: "0x%08X", UInt32(bitPattern: Int32(cableVDO)))
+        fputs("warn: inconsistent data on (\(vidStr), \(pidStr), \(vdoStr)): \(speeds) distinct speed(s), \(powers) distinct power(s)\n", stderr)
+    }
+    sqlite3_finalize(checkStmt)
+}
+
+// Summary: total rows, unique fingerprints, shared fingerprints.
+var totalRows = 0
+var uniqueFingerprints = 0
+var sharedFingerprints = 0
+let summaryQuery = """
+    SELECT COUNT(*) as total,
+           COUNT(DISTINCT vid || ':' || pid || ':' || cable_vdo) as unique_fps
+    FROM cables
+    """
+let sharedQuery = """
+    SELECT COUNT(*) FROM (
+        SELECT vid, pid, cable_vdo FROM cables
+        GROUP BY vid, pid, cable_vdo
+        HAVING COUNT(*) > 1
+    )
+    """
+var sumStmt: OpaquePointer?
+if sqlite3_prepare_v2(db, summaryQuery, -1, &sumStmt, nil) == SQLITE_OK {
+    if sqlite3_step(sumStmt) == SQLITE_ROW {
+        totalRows = Int(sqlite3_column_int(sumStmt, 0))
+        uniqueFingerprints = Int(sqlite3_column_int(sumStmt, 1))
+    }
+    sqlite3_finalize(sumStmt)
+}
+var sharedStmt: OpaquePointer?
+if sqlite3_prepare_v2(db, sharedQuery, -1, &sharedStmt, nil) == SQLITE_OK {
+    if sqlite3_step(sharedStmt) == SQLITE_ROW {
+        sharedFingerprints = Int(sqlite3_column_int(sharedStmt, 0))
+    }
+    sqlite3_finalize(sharedStmt)
+}
+print("Cable DB summary: \(totalRows) total rows, \(uniqueFingerprints) unique fingerprints, \(sharedFingerprints) shared fingerprints")
 
 let jsonCount = exportCablesJSON()
 print("Exported \(jsonCount) cables to \(cablesJSON)")

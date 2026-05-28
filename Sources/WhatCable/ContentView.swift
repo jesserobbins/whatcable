@@ -69,18 +69,16 @@ extension View {
 }
 
 struct ContentView: View {
-    @StateObject private var portWatcher = AppleHPMInterfaceWatcher()
-    @StateObject private var deviceWatcher = USBWatcher()
-    @StateObject private var powerWatcher = PowerSourceWatcher()
-    @StateObject private var pdWatcher = USBPDSOPWatcher()
-    @StateObject private var tbWatcher = IOIOThunderboltSwitchWatcher()
-    @StateObject private var usb3Watcher = USB3TransportWatcher()
-    @StateObject private var trmWatcher = TRMTransportWatcher()
+    @ObservedObject private var portWatcher = WatcherHub.shared.portWatcher
+    @ObservedObject private var deviceWatcher = WatcherHub.shared.deviceWatcher
+    @ObservedObject private var powerWatcher = WatcherHub.shared.powerWatcher
+    @ObservedObject private var pdWatcher = WatcherHub.shared.pdWatcher
+    @ObservedObject private var tbWatcher = WatcherHub.shared.tbWatcher
+    @ObservedObject private var usb3Watcher = WatcherHub.shared.usb3Watcher
+    @ObservedObject private var trmWatcher = WatcherHub.shared.trmWatcher
     @EnvironmentObject private var refresh: RefreshSignal
     @ObservedObject private var settings = AppSettings.shared
     @ObservedObject private var updates = UpdateChecker.shared
-    @State private var portRefreshTask: Task<Void, Never>?
-    @State private var portPollTask: Task<Void, Never>?
     @State private var isDesktopMac = false
 
     private var showAdvanced: Bool {
@@ -119,46 +117,11 @@ struct ContentView: View {
         .frame(minWidth: 560, idealWidth: 560, maxWidth: 760, minHeight: 200, maxHeight: 760)
         .environment(\.fontScale, settings.fontSize)
         .onAppear {
-            portWatcher.start()
-            deviceWatcher.start()
-            powerWatcher.start()
-            pdWatcher.start()
-            tbWatcher.start()
-            usb3Watcher.start()
-            trmWatcher.start()
-            startPortPoll()
             isDesktopMac = AppleSmartBatteryReader.read().isDesktopMac
         }
-        .onDisappear {
-            portRefreshTask?.cancel()
-            portRefreshTask = nil
-            portPollTask?.cancel()
-            portPollTask = nil
-            portWatcher.stop()
-            deviceWatcher.stop()
-            powerWatcher.stop()
-            pdWatcher.stop()
-            tbWatcher.stop()
-            usb3Watcher.stop()
-            trmWatcher.stop()
-        }
         .onChange(of: refresh.tick) { _, _ in
-            portWatcher.refresh()
-            powerWatcher.refresh()
-            pdWatcher.refresh()
-            tbWatcher.refresh()
-            usb3Watcher.refresh()
-            trmWatcher.refresh()
+            WatcherHub.shared.refreshAll()
         }
-        // Port controller services don't fire IOKit match notifications when
-        // their connection state flips, so we re-poll the port watcher
-        // whenever any of the three live signals (device add/remove, power
-        // source add/remove, PD identity add/remove) changes. Debounced so a
-        // single plug event, which can fire all three within a few ms,
-        // produces one refresh, with a backoff to catch slow controllers.
-        .onChange(of: deviceWatcher.devices) { _, _ in scheduleLivePortRefresh() }
-        .onChange(of: powerWatcher.sources) { _, _ in scheduleLivePortRefresh() }
-        .onChange(of: pdWatcher.identities) { _, _ in scheduleLivePortRefresh() }
         // If a Pro screen is re-opened while it's already detached into
         // its own window, focus that window instead of also showing it
         // in-place, so it's never in two places at once.
@@ -166,47 +129,6 @@ struct ContentView: View {
             guard newID != nil, let route = refresh.activeProScreen else { return }
             if DetachedProWindowManager.shared.focusIfOpen(route: route) {
                 refresh.activeProScreen = nil
-            }
-        }
-    }
-
-    private func scheduleLivePortRefresh() {
-        portRefreshTask?.cancel()
-        portRefreshTask = Task { @MainActor in
-            // Some port controllers (notably AppleHPMInterfaceType11 / MagSafe)
-            // hold ConnectionActive=true for several seconds after unplug, so
-            // we re-poll over a long backoff instead of guessing one delay.
-            // refresh() is a no-op when nothing changed, so extra polls are
-            // cheap and never cause flicker.
-            for delay in [150, 500, 1500, 3000, 6000] {
-                try? await Task.sleep(for: .milliseconds(delay))
-                guard !Task.isCancelled else { return }
-                portWatcher.refresh()
-                powerWatcher.refresh()
-                pdWatcher.refresh()
-                usb3Watcher.refresh()
-                trmWatcher.refresh()
-            }
-        }
-    }
-
-    /// Background safety net: poll the port watcher once a second while the
-    /// popover is visible. Catches slow-updating controllers that don't fire
-    /// IOKit interest notifications when their connection state flips, and
-    /// covers state changes that happen outside the burst window triggered
-    /// by scheduleLivePortRefresh. The conditional assignment in
-    /// AppleHPMInterfaceWatcher.refresh() means polls are free when nothing changed.
-    private func startPortPoll() {
-        portPollTask?.cancel()
-        portPollTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                guard !Task.isCancelled else { return }
-                portWatcher.refresh()
-                powerWatcher.refresh()
-                pdWatcher.refresh()
-                usb3Watcher.refresh()
-                trmWatcher.refresh()
             }
         }
     }

@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "केबल में e-marker नहीं है (बेसिक केबल)";
 "Cable has an e-marker chip (advertises its capabilities)" = "केबल में e-marker चिप है (अपनी क्षमताएँ बताता है)";
 "Cable is limiting charging speed" = "केबल चार्जिंग गति सीमित कर रहा है";
+"Cable identified as %@" = "Cable identified as %@";
 "Cable made by %@" = "निर्माता: %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "केबल रेटिंग: %1$@, अधिकतम %2$lld V (~%3$lld W)";
 "Cable speed: %@" = "केबल गति: %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "e-marker एक आरक्षित डेटा-स्पीड मान का उपयोग करता है";
 "E-marker uses an invalid VDO version" = "e-marker एक अमान्य VDO संस्करण का उपयोग करता है";
 "E-marker uses an invalid cable-termination value" = "e-marker एक अमान्य केबल-टर्मिनेशन मान का उपयोग करता है";
+"Fingerprint shared across %@" = "Fingerprint shared across %@";
 "Last leg drops from %@ to %@" = "अंतिम खंड %1$@ से %2$@ तक गिरता है";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "वैध USB-IF सदस्य गैर-शून्य वेंडर ID वाले केबल भेजते हैं। शून्य VID नकली केबल की आम पहचान है।";
 "Linked at %@" = "%@ पर लिंक्ड";

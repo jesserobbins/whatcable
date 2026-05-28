@@ -37,30 +37,37 @@ public enum CableDB {
         store.vendors[vid]?.source == "usbif"
     }
 
-    /// Look up a known cable by its e-marker fingerprint. Returns
-    /// nil when the cable isn't in our curated database.
+    /// Look up known cables by e-marker fingerprint. Returns all
+    /// curated entries that share this (VID, PID, Cable VDO) tuple.
     ///
-    /// An all-zero fingerprint (VID 0, PID 0, Cable VDO 0) carries no
-    /// identifying bits at all and is shared by every fully-zeroed
-    /// budget cable. They all collapsed onto the single curated row
-    /// keyed on (0,0,0), mislabeling unrelated cables as one arbitrary
-    /// product. Refuse only this degenerate key. A zeroed VID/PID with
-    /// a specific non-zero Cable VDO still selects the curated entry
-    /// keyed on that VDO and is kept. See issue #161.
-    public static func curatedCable(
+    /// Multiple cables can share the same fingerprint when different
+    /// brand owners use the same ODM e-marker silicon (e.g. Baseus and
+    /// CUKTECH both ship cables with Shenzhen Injoinic VID 0x2E87).
+    /// The caller decides how to present single vs. shared matches.
+    ///
+    /// Returns an empty array for unknown fingerprints and for the
+    /// all-zero key (0, 0, 0), which carries no identifying bits.
+    /// See issue #161.
+    public static func curatedCables(
         vid: Int,
         pid: Int,
         cableVDO: UInt32
-    ) -> CuratedCable? {
-        if vid == 0 && pid == 0 && cableVDO == 0 { return nil }
-        return store.cables[CableKey(vid: vid, pid: pid, cableVDO: cableVDO)]
+    ) -> [CuratedCable] {
+        if vid == 0 && pid == 0 && cableVDO == 0 { return [] }
+        return store.cables[CableKey(vid: vid, pid: pid, cableVDO: cableVDO)] ?? []
     }
 
     /// Number of vendor entries loaded. Exposed for tests.
     public static var vendorCount: Int { store.vendors.count }
 
-    /// Number of cable entries loaded. Exposed for tests.
-    public static var cableCount: Int { store.cables.count }
+    /// Total number of cable entries loaded (counts every row, not
+    /// unique fingerprints). Exposed for tests.
+    public static var cableCount: Int {
+        store.cables.values.reduce(0) { $0 + $1.count }
+    }
+
+    /// Number of distinct (VID, PID, Cable VDO) fingerprints.
+    public static var fingerprintCount: Int { store.cables.count }
 }
 
 /// A cable identified by user reports and curated into the database.
@@ -82,7 +89,7 @@ private struct CableKey: Hashable {
 
 private struct Store {
     let vendors: [Int: CableDB.VendorEntry]
-    let cables: [CableKey: CuratedCable]
+    let cables: [CableKey: [CuratedCable]]
 
     static func load() -> Store {
         guard let url = Bundle.module.url(forResource: "whatcable", withExtension: "db")
@@ -127,17 +134,21 @@ private struct Store {
         return map
     }
 
-    private static func loadCables(db: OpaquePointer) -> [CableKey: CuratedCable] {
+    private static func loadCables(db: OpaquePointer) -> [CableKey: [CuratedCable]] {
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(
-            db, "SELECT vid, pid, cable_vdo, brand, speed, power, type, issue_url FROM cables",
+            db, """
+            SELECT vid, pid, cable_vdo, brand, speed, power, type, issue_url
+            FROM cables
+            ORDER BY vid, pid, cable_vdo, brand
+            """,
             -1, &stmt, nil
         ) == SQLITE_OK else {
             return [:]
         }
         defer { sqlite3_finalize(stmt) }
 
-        var map: [CableKey: CuratedCable] = [:]
+        var map: [CableKey: [CuratedCable]] = [:]
         while sqlite3_step(stmt) == SQLITE_ROW {
             let vid = Int(sqlite3_column_int(stmt, 0))
             let pid = Int(sqlite3_column_int(stmt, 1))
@@ -145,13 +156,13 @@ private struct Store {
             guard let brandPtr = sqlite3_column_text(stmt, 3) else { continue }
 
             let key = CableKey(vid: vid, pid: pid, cableVDO: cableVDO)
-            map[key] = CuratedCable(
+            map[key, default: []].append(CuratedCable(
                 brand: String(cString: brandPtr),
                 speed: sqlite3_column_text(stmt, 4).map { String(cString: $0) } ?? "",
                 power: sqlite3_column_text(stmt, 5).map { String(cString: $0) } ?? "",
                 type: sqlite3_column_text(stmt, 6).map { String(cString: $0) } ?? "",
                 issueURL: sqlite3_column_text(stmt, 7).map { String(cString: $0) } ?? ""
-            )
+            ))
         }
         return map
     }

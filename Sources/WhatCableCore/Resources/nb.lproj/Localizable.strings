@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "Kabelen har ingen e-marker (basiskabel)";
 "Cable has an e-marker chip (advertises its capabilities)" = "Kabelen har en e-marker-brikke (annonserer sine egenskaper)";
 "Cable is limiting charging speed" = "Kabelen begrenser ladehastigheten";
+"Cable identified as %@" = "Kabel identifisert som %@";
 "Cable made by %@" = "Kabel laget av %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "Kabel dimensjonert for %1$@ opptil %2$lld V (~%3$lld W)";
 "Cable speed: %@" = "Kabelhastighet: %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "e-marker bruker en reservert datahastighetsverdi";
 "E-marker uses an invalid VDO version" = "e-marker bruker en ugyldig VDO-versjon";
 "E-marker uses an invalid cable-termination value" = "e-marker bruker en ugyldig kabeltermineringsverdi";
+"Fingerprint shared across %@" = "Fingeravtrykk delt mellom %@";
 "Last leg drops from %@ to %@" = "Siste etappe faller fra %1$@ til %2$@";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "Legitime USB-IF-medlemmer leverer kabler med en produsentID ulik null. En nullstilt VID er et vanlig forfalskningskjennetegn.";
 "Linked at %@" = "Koblet ved %@";

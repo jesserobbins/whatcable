@@ -85,6 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         // app name even though the SwiftPM executable name might differ.
         ProcessInfo.processInfo.setValue(AppInfo.name, forKey: "processName")
 
+        WatcherHub.shared.start()
         NotificationManager.shared.start()
         WidgetDataWriter.shared.start()
         UpdateChecker.shared.start()

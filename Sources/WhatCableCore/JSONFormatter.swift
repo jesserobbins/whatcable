@@ -247,7 +247,7 @@ private struct CableDTO: Codable {
     let endpoint: String
     let vendorID: Int
     let vendorName: String?
-    let curatedBrand: String?
+    let curatedBrands: [String]?
     let speed: String?
     let currentRating: String?
     let maxVolts: Int?
@@ -261,9 +261,12 @@ private struct CableDTO: Codable {
         self.vendorID = identity.vendorID
         self.vendorName = VendorDB.name(for: identity.vendorID)
         let vdo = identity.vdos.count > 3 ? identity.vdos[3] : 0
-        self.curatedBrand = CableDB.curatedCable(
+        let curated = CableDB.curatedCables(
             vid: identity.vendorID, pid: identity.productID, cableVDO: vdo
-        )?.brand
+        )
+        var seen = Set<String>()
+        let unique = curated.map(\.brand).filter { seen.insert($0).inserted }
+        self.curatedBrands = unique.isEmpty ? nil : unique
         if let cv = identity.cableVDO {
             self.speed = cv.speed.label
             self.currentRating = cv.current.label

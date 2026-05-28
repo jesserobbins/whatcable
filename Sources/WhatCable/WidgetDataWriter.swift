@@ -16,9 +16,7 @@ import WhatCableAppKit
 /// keeps the distribution profile-free while giving both processes the same
 /// sandbox-authorized container.
 ///
-/// Owns its own set of watchers so it runs independently of the UI.
-/// Mirrors the pattern used by NotificationManager: watchers start at
-/// app launch and keep running even when the popover is closed.
+/// Reads from the shared WatcherHub.
 @MainActor
 final class WidgetDataWriter {
     static let shared = WidgetDataWriter()
@@ -28,14 +26,13 @@ final class WidgetDataWriter {
         category: "widget-data"
     )
 
-    // Own watcher instances, independent of the UI's watchers.
-    private let portWatcher = AppleHPMInterfaceWatcher()
-    private let deviceWatcher = USBWatcher()
-    private let powerWatcher = PowerSourceWatcher()
-    private let pdWatcher = USBPDSOPWatcher()
-    private let tbWatcher = IOIOThunderboltSwitchWatcher()
-    private let usb3Watcher = USB3TransportWatcher()
-    private let trmWatcher = TRMTransportWatcher()
+    private var portWatcher: AppleHPMInterfaceWatcher { WatcherHub.shared.portWatcher }
+    private var deviceWatcher: USBWatcher { WatcherHub.shared.deviceWatcher }
+    private var powerWatcher: PowerSourceWatcher { WatcherHub.shared.powerWatcher }
+    private var pdWatcher: USBPDSOPWatcher { WatcherHub.shared.pdWatcher }
+    private var tbWatcher: IOIOThunderboltSwitchWatcher { WatcherHub.shared.tbWatcher }
+    private var usb3Watcher: USB3TransportWatcher { WatcherHub.shared.usb3Watcher }
+    private var trmWatcher: TRMTransportWatcher { WatcherHub.shared.trmWatcher }
 
     private var cancellables = Set<AnyCancellable>()
     private var writeTask: Task<Void, Never>?
@@ -56,52 +53,44 @@ final class WidgetDataWriter {
         guard !isStarted else { return }
         isStarted = true
         Self.log.debug("WidgetDataWriter starting (sharedFileURL: \(WidgetSnapshot.sharedFileURL?.path ?? "nil"))")
-        portWatcher.start()
-        deviceWatcher.start()
-        powerWatcher.start()
-        pdWatcher.start()
-        tbWatcher.start()
-        usb3Watcher.start()
-        trmWatcher.start()
-
         // Write an initial snapshot once watchers have had a tick to populate.
         DispatchQueue.main.async { [weak self] in
             self?.scheduleWrite()
         }
 
-        // Watch all five signals. A single cable plug can fire several of
+        // Watch all seven signals. A single cable plug can fire several of
         // these within a few ms, so scheduleWrite() debounces into one write.
-        portWatcher.$ports
+        WatcherHub.shared.portWatcher.$ports
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
 
-        deviceWatcher.$devices
+        WatcherHub.shared.deviceWatcher.$devices
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
 
-        powerWatcher.$sources
+        WatcherHub.shared.powerWatcher.$sources
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
 
-        pdWatcher.$identities
+        WatcherHub.shared.pdWatcher.$identities
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
 
-        tbWatcher.$switches
+        WatcherHub.shared.tbWatcher.$switches
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
 
-        usb3Watcher.$transports
+        WatcherHub.shared.usb3Watcher.$transports
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
 
-        trmWatcher.$cioCapabilities
+        WatcherHub.shared.trmWatcher.$cioCapabilities
             .dropFirst()
             .sink { [weak self] _ in self?.scheduleWrite() }
             .store(in: &cancellables)
@@ -133,15 +122,6 @@ final class WidgetDataWriter {
         writeTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(200))
             guard !Task.isCancelled else { return }
-
-            // Refresh all watchers to pick up property changes that
-            // don't fire match notifications (same reason ContentView
-            // polls on a timer).
-            portWatcher.refresh()
-            powerWatcher.refresh()
-            pdWatcher.refresh()
-            usb3Watcher.refresh()
-            trmWatcher.refresh()
 
             let snapshot = buildSnapshot()
 

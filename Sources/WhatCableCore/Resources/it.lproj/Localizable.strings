@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "Il cavo non contiene un e-marker (cavo base)";
 "Cable has an e-marker chip (advertises its capabilities)" = "Il cavo ha un chip e-marker (dichiara le sue capacità)";
 "Cable is limiting charging speed" = "Il cavo limita la velocità di ricarica";
+"Cable identified as %@" = "Cavo identificato come %@";
 "Cable made by %@" = "Cavo realizzato da %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "Cavo classificato per %1$@ fino a %2$lldV (~%3$lldW)";
 "Cable speed: %@" = "Velocità cavo: %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "L'E-marker usa un valore di velocità dati riservato";
 "E-marker uses an invalid VDO version" = "L'e-marker usa una versione VDO non valida";
 "E-marker uses an invalid cable-termination value" = "L'e-marker usa un valore di terminazione del cavo non valido";
+"Fingerprint shared across %@" = "Impronta condivisa tra %@";
 "Last leg drops from %@ to %@" = "L'ultima tratto decade da %1$@ a %2$@";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "I membri legittimi di USB-IF spediscono cavi con un ID fornitore diverso da zero. Un VID a zero è una comune firma contraffatta.";
 "Linked at %@" = "Collegato a %@";

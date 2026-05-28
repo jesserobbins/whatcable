@@ -314,10 +314,21 @@ extension PortSummary {
         if let cable = cableEmarker, cable.vendorID != 0 {
             let vendor = VendorDB.label(for: cable.vendorID)
             bullets.append(String(localized: "Cable made by \(vendor)", bundle: _coreLocalizedBundle))
+
+            let vdo = cable.vdos.count > 3 ? cable.vdos[3] : 0
+            let matches = CableDB.curatedCables(vid: cable.vendorID, pid: cable.productID, cableVDO: vdo)
+            if matches.count > 1 {
+                let brands = Self.joinedBrands(matches)
+                bullets.append(String(localized: "Fingerprint shared across \(brands)", bundle: _coreLocalizedBundle))
+            }
         } else if let cable = cableEmarker {
             let vdo = cable.vdos.count > 3 ? cable.vdos[3] : 0
-            if let known = CableDB.curatedCable(vid: cable.vendorID, pid: cable.productID, cableVDO: vdo) {
-                bullets.append(String(localized: "Cable identified as \(known.brand)", bundle: _coreLocalizedBundle))
+            let matches = CableDB.curatedCables(vid: cable.vendorID, pid: cable.productID, cableVDO: vdo)
+            if matches.count == 1 {
+                bullets.append(String(localized: "Cable identified as \(matches[0].brand)", bundle: _coreLocalizedBundle))
+            } else if matches.count > 1 {
+                let brands = Self.joinedBrands(matches)
+                bullets.append(String(localized: "Fingerprint shared across \(brands)", bundle: _coreLocalizedBundle))
             }
         }
 
@@ -457,6 +468,15 @@ extension PortSummary {
         }
 
         self.bullets = bullets
+    }
+
+    private static func joinedBrands(_ cables: [CuratedCable]) -> String {
+        var seen = Set<String>()
+        let names = cables.map(\.brand).filter { seen.insert($0).inserted }
+        if names.count <= 2 {
+            return names.joined(separator: " or ")
+        }
+        return names.dropLast().joined(separator: ", ") + ", or " + names.last!
     }
 }
 

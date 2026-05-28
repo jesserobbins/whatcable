@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "Մալուխը չունի e-marker չիպ (սովորական մալուխ";
 "Cable has an e-marker chip (advertises its capabilities)" = "Մալուխն ունի e-marker չիպ (հայտնում է իր հնարավորությունների մասին)";
 "Cable is limiting charging speed" = "Մալուխը սահմանափակում է լիցքավորման արագությունը";
+"Cable identified as %@" = "Cable identified as %@";
 "Cable made by %@" = "Մալուխի արտադրող՝ %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "Մալուխը նախատեսված է %1$@՝ մինչև %2$lldV լարման համար (~%3$lldW)";
 "Cable speed: %@" = "Մալուխի արագությունը՝ %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "E-marker-ն օգտագործում է տվյալների արագության պահուստավորված արժեք";
 "E-marker uses an invalid VDO version" = "E-marker-ն օգտագործում է անվավեր VDO տարբերակ";
 "E-marker uses an invalid cable-termination value" = "E-marker-ն օգտագործում է մալուխի ավարտավորման (termination) անվավեր արժեք";
+"Fingerprint shared across %@" = "Fingerprint shared across %@";
 "Last leg drops from %@ to %@" = "Վերջին հատվածում արագությունը նվազում է %1$@-ից %2$@-ի";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "USB-IF օրինական անդամները մատակարարում են մալուխներ ոչ զրոյական արտադրողի ID-ով (VID): Զրոյական VID-ը կեղծման տարածված նշան է:";
 "Linked at %@" = "Կապված է %@ արագությամբ";

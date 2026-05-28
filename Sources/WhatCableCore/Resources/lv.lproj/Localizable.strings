@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "Kabelim nav e-marķiera (vienkāršs kabelis)";
 "Cable has an e-marker chip (advertises its capabilities)" = "Kabelim ir e-marķiera mikroshēma (paziņo savas iespējas)";
 "Cable is limiting charging speed" = "Kabelis ierobežo uzlādes ātrumu";
+"Cable identified as %@" = "Cable identified as %@";
 "Cable made by %@" = "Kabeļa ražotājs: %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "Kabelis novērtēts %1$@ pie sprieguma līdz %2$lld V (~%3$lld W)";
 "Cable speed: %@" = "Kabeļa ātrums: %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "E-marķieris izmanto rezervētu datu ātruma vērtību";
 "E-marker uses an invalid VDO version" = "E-marķieris izmanto nederīgu VDO versiju";
 "E-marker uses an invalid cable-termination value" = "E-marķieris izmanto nederīgu kabeļa terminācijas vērtību";
+"Fingerprint shared across %@" = "Fingerprint shared across %@";
 "Last leg drops from %@ to %@" = "Pēdējais posms samazinās no %1$@ uz %2$@";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "Leģitīmi USB-IF biedri piegādā kabeļus ar ražotāja ID, kas nav nulle. Nulles VID ir bieži sastopama viltojuma pazīme.";
 "Linked at %@" = "Savienots ar %@";

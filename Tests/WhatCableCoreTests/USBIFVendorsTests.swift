@@ -96,22 +96,24 @@ struct CableDBTests {
 
     @Test("curated cable not found for unknown")
     func curatedCableNotFoundForUnknown() {
-        #expect(CableDB.curatedCable(vid: 0xDEAD, pid: 0xBEEF, cableVDO: 0) == nil)
+        #expect(CableDB.curatedCables(vid: 0xDEAD, pid: 0xBEEF, cableVDO: 0).isEmpty)
     }
 
     @Test("curated cable lookup")
     func curatedCableLookup() {
         // CalDigit TS5 Plus bundled cable: VID 0x01B6, PID 0x4003.
-        let cable = CableDB.curatedCable(vid: 0x01B6, pid: 0x4003, cableVDO: 0x110A2644)
-        #expect(cable != nil)
-        #expect(cable?.brand.contains("CalDigit") ?? false)
+        let cables = CableDB.curatedCables(vid: 0x01B6, pid: 0x4003, cableVDO: 0x110A2644)
+        #expect(!cables.isEmpty)
+        #expect(cables.contains { $0.brand.contains("CalDigit") })
     }
 
     @Test("cable count matches expected")
     func cableCountMatchesExpected() {
-        // 12 distinct fingerprints from 13 reports (two CalDigit reports
-        // share the same VID/PID/VDO, so they collapse to one row).
+        // cableCount is the total number of individual cable entries
+        // (one row per report); fingerprintCount is unique VID/PID/VDO
+        // fingerprints (multiple reports on the same cable collapse to one).
         #expect(CableDB.cableCount >= 10)
+        #expect(CableDB.fingerprintCount >= 10)
     }
 
     @Test("all-zero fingerprint never matches a curated cable")
@@ -120,7 +122,7 @@ struct CableDBTests {
         // shared by every fully-zeroed budget cable. They all
         // collapsed onto one arbitrary curated row (the Anker 140W
         // entry), mislabeling unrelated cables. See #161.
-        #expect(CableDB.curatedCable(vid: 0, pid: 0, cableVDO: 0) == nil)
+        #expect(CableDB.curatedCables(vid: 0, pid: 0, cableVDO: 0).isEmpty)
     }
 
     @Test("zeroed VID with a distinguishing Cable VDO still resolves")
@@ -128,11 +130,20 @@ struct CableDBTests {
         // A zeroed VID/PID but a specific non-zero Cable VDO still
         // identifies the curated entry keyed on that VDO. Only the
         // all-zero key is rejected; a real VDO is kept.
-        let dockcase = CableDB.curatedCable(vid: 0, pid: 0, cableVDO: 0x00082042)
-        let vorodcip = CableDB.curatedCable(vid: 0, pid: 0, cableVDO: 0x000A6642)
+        let dockcase = CableDB.curatedCables(vid: 0, pid: 0, cableVDO: 0x00082042)
+        let vorodcip = CableDB.curatedCables(vid: 0, pid: 0, cableVDO: 0x000A6642)
 
-        #expect(dockcase != nil)
-        #expect(vorodcip != nil)
-        #expect(dockcase?.brand != vorodcip?.brand)
+        #expect(!dockcase.isEmpty)
+        #expect(!vorodcip.isEmpty)
+        let dockcaseBrands = Set(dockcase.map(\.brand))
+        let vorodcipBrands = Set(vorodcip.map(\.brand))
+        #expect(dockcaseBrands.isDisjoint(with: vorodcipBrands))
+    }
+
+    @Test("shared fingerprint returns multiple entries")
+    func sharedFingerprintReturnsMultipleEntries() {
+        // CalDigit TB5 cables: same silicon, reported in multiple issues.
+        let cables = CableDB.curatedCables(vid: 0x01B6, pid: 0x4003, cableVDO: 0x110A2644)
+        #expect(cables.count > 1, "Expected multiple entries for shared CalDigit fingerprint")
     }
 }

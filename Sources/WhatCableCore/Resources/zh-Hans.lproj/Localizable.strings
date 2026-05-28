@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "线缆未声明 e-marker（基础线缆）";
 "Cable has an e-marker chip (advertises its capabilities)" = "线缆带有 e-marker 芯片（会声明自身能力）";
 "Cable is limiting charging speed" = "线缆限制了充电速度";
+"Cable identified as %@" = "线缆识别为%@";
 "Cable made by %@" = "线缆制造商：%@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "线缆额定 %1$@，最高 %2$lldV（约 %3$lldW）";
 "Cable speed: %@" = "线缆速度：%@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "E-marker 使用了保留的数据速度值";
 "E-marker uses an invalid VDO version" = "E-marker 使用了无效的 VDO 版本";
 "E-marker uses an invalid cable-termination value" = "E-marker 使用了无效的线缆端接值";
+"Fingerprint shared across %@" = "指纹在%@之间共享";
 "Last leg drops from %@ to %@" = "最后一段从 %1$@ 降到 %2$@";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "正规的 USB-IF 成员通常在线缆中使用非零 vendor ID。全零 VID 是常见的仿冒特征。";
 "Linked at %@" = "链路速度 %@";

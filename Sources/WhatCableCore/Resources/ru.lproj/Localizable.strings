@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "Кабель не сообщает данные e-marker (базовый кабель)";
 "Cable has an e-marker chip (advertises its capabilities)" = "В кабеле есть чип e-marker (сообщает свои возможности)";
 "Cable is limiting charging speed" = "Кабель ограничивает скорость зарядки";
+"Cable identified as %@" = "Кабель идентифицирован как %@";
 "Cable made by %@" = "Кабель произведён: %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "Кабель рассчитан на %1$@ при до %2$lld В (~%3$lld Вт)";
 "Cable speed: %@" = "Скорость кабеля: %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "E-marker использует зарезервированное значение скорости данных";
 "E-marker uses an invalid VDO version" = "E-marker использует недопустимую версию VDO";
 "E-marker uses an invalid cable-termination value" = "E-marker использует недопустимое значение окончания кабеля";
+"Fingerprint shared across %@" = "Отпечаток общий для %@";
 "Last leg drops from %@ to %@" = "Последнее звено снижает скорость с %1$@ до %2$@";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "Легитимные участники USB-IF поставляют кабели с ненулевым идентификатором производителя. Нулевой VID — частый признак подделки.";
 "Linked at %@" = "Связь на уровне %@";

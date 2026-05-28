@@ -16,6 +16,7 @@
 "Cable does not advertise an e-marker (basic cable)" = "ケーブルはe-markerを持っていません（ベーシックケーブル）";
 "Cable has an e-marker chip (advertises its capabilities)" = "ケーブルにe-markerチップあり（性能を通知）";
 "Cable is limiting charging speed" = "ケーブルが充電速度を制限しています";
+"Cable identified as %@" = "ケーブルは%@と識別されました";
 "Cable made by %@" = "製造元: %@";
 "Cable rated for %@ at up to %lldV (~%lldW)" = "ケーブル定格: %1$@、最大%2$lld V（約%3$lld W）";
 "Cable speed: %@" = "ケーブル速度: %@";
@@ -53,6 +54,7 @@
 "E-marker uses a reserved data-speed value" = "e-markerが予約済みのデータ速度値を使用";
 "E-marker uses an invalid VDO version" = "e-markerが無効なVDOバージョンを使用";
 "E-marker uses an invalid cable-termination value" = "e-markerが無効なケーブル終端値を使用";
+"Fingerprint shared across %@" = "フィンガープリントは%@で共有されています";
 "Last leg drops from %@ to %@" = "最終区間で%1$@から%2$@に低下";
 "Legitimate USB-IF members ship cables with a non-zero vendor ID. A zeroed VID is a common counterfeit signature." = "正規のUSB-IFメンバーはゼロでないベンダーIDのケーブルを出荷します。ゼロのVIDは一般的な偽造品の特徴です。";
 "Linked at %@" = "%@でリンク";
