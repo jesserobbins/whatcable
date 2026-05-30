@@ -170,6 +170,7 @@ brew install --cask whatcable</pre>
 <ul>
   <li><strong>Charging info:</strong> how many watts your Mac is drawing, and whether the cable, charger, or Mac itself is limiting the charge speed.</li>
   <li><strong>Speed info:</strong> a plain-English line explaining what's limiting the data speed, so you know whether a faster cable would actually help.</li>
+  <li><strong>Display info:</strong> when a monitor is connected, a one-line verdict on whether the link is carrying its full resolution and refresh, or falling short, and what's holding it back.</li>
   <li><strong>Cable info:</strong> the cable's maximum speed and power rating, plus the manufacturer if known. If the cable matches one in the built-in <a href="/cables">cable database</a>, the brand and model are shown too.</li>
   <li><strong>Charger power levels:</strong> every wattage your charger can supply, with the one your Mac picked highlighted. Useful for checking whether a charger really supports the wattage on the box.</li>
   <li><strong>Connected device:</strong> the name and type of whatever's plugged in at the other end.</li>
@@ -369,6 +370,16 @@ brew install --cask whatcable</pre>
 <figure>
   <img src="/screenshot-negotiation-diagnostics.webp" alt="Negotiation Diagnostics screen showing per-port power and data-speed breakdowns with the bottleneck highlighted" loading="lazy" width="480">
   <figcaption>Negotiation Diagnostics: what each part of the chain supports vs. what was actually negotiated.</figcaption>
+</figure>
+
+<h3>Display Diagnostics <span class="pro-badge">Pro</span></h3>
+<p>
+  The same weak-link idea, applied to video. WhatCable reads your monitor's full capability from its EDID and compares it against what the DisplayPort link is actually carrying, so a screen stuck below its top resolution or refresh has an explanation you can act on. It shows the monitor's native and top modes, what the link is delivering, the lanes in use against those available, and the link rate. If a USB-C to HDMI or DisplayPort adapter is in the chain, it names what the adapter reports itself as, which is often the real cap. It only says "not the cable" when the evidence shows it (a Thunderbolt tunnel, or every lane already in use), and otherwise points at the likely cause without crying wolf, since a shortfall can also just be the mode you have selected.
+</p>
+
+<figure>
+  <img src="/screenshot-display-diagnostics.webp" alt="Display Diagnostics screen showing a monitor's top mode against what the DisplayPort link is carrying, with the adapter named and the shortfall highlighted" loading="lazy" width="480">
+  <figcaption>Display Diagnostics: what your monitor can do vs what the link is carrying, with the limiting factor named.</figcaption>
 </figure>
 
 <h3>Live power metering <span class="pro-badge">Pro</span></h3>
