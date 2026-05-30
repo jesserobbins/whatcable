@@ -311,7 +311,7 @@
 
 /* Pro plugin strings missing from prior export */
 "Enter Licence Key…" = "Inserisci chiave di licenza…";
-"Negotiated PD contract maximum. Live draw is shown in the System Power Input chart below." = "Massimo contratto PD negoziato. Il consumo in tempo reale è visualizzato nel grafico 'Ingresso alimentazione sistema' qui sotto.";
+"This is the most the charger and your Mac agreed to, not a live reading. Your Mac doesn't report power per port, so the live input is shown in the System Power Input chart below." = "È il massimo concordato tra il caricatore e il tuo Mac, non una misurazione in tempo reale. Il tuo Mac non riporta la potenza per singola porta, quindi l'ingresso in tempo reale è mostrato nel grafico 'Ingresso alimentazione di sistema' qui sotto.";
 "No power data for this port right now." = "Nessun dato di alimentazione per questa porta al momento.";
 "Waiting for power telemetry from macOS..." = "In attesa dei dati di alimentazione da macOS...";
 "Upgrade to WhatCable Pro" = "Passa a WhatCable Pro";

@@ -311,7 +311,7 @@
 
 /* Pro plugin strings missing from prior export */
 "Enter Licence Key…" = "लाइसेंस कुंजी दर्ज करें…";
-"Negotiated PD contract maximum. Live draw is shown in the System Power Input chart below." = "नेगोशिएटेड PD कॉन्ट्रैक्ट का अधिकतम। लाइव ड्रॉ नीचे सिस्टम पावर इनपुट चार्ट में दिखाया गया है।";
+"This is the most the charger and your Mac agreed to, not a live reading. Your Mac doesn't report power per port, so the live input is shown in the System Power Input chart below." = "यह आपके चार्जर और Mac के बीच तय हुई अधिकतम सीमा है, कोई लाइव माप नहीं। आपका Mac हर पोर्ट की पावर अलग से रिपोर्ट नहीं करता, इसलिए लाइव इनपुट नीचे सिस्टम पावर इनपुट चार्ट में दिखाया गया है।";
 "No power data for this port right now." = "इस पोर्ट के लिए अभी कोई पावर डेटा नहीं।";
 "Waiting for power telemetry from macOS..." = "macOS से पावर टेलीमेट्री की प्रतीक्षा...";
 "Upgrade to WhatCable Pro" = "WhatCable Pro में अपग्रेड करें";

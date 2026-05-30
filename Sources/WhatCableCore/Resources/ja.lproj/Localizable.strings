@@ -313,7 +313,7 @@
 
 /* Pro plugin strings missing from prior export */
 "Enter Licence Key…" = "ライセンスキーを入力…";
-"Negotiated PD contract maximum. Live draw is shown in the System Power Input chart below." = "ネゴシエート済みPDコントラクトの最大値。実際の消費は下の「システム電力入力」グラフに表示されます。";
+"This is the most the charger and your Mac agreed to, not a live reading. Your Mac doesn't report power per port, so the live input is shown in the System Power Input chart below." = "これは充電器とお使いのMacが合意した最大値であり、実際の測定値ではありません。Macはポートごとの電力を報告しないため、実際の入力は下の「システム電源入力」グラフに表示されます。";
 "No power data for this port right now." = "現在このポートの電力データはありません。";
 "Waiting for power telemetry from macOS..." = "macOSから電力データの受信を待機中...";
 "Upgrade to WhatCable Pro" = "WhatCable Proにアップグレード";
