@@ -13,7 +13,7 @@ USB-C hides a lot under one connector. Anything from a USB 2.0 charge-only cable
 [![Latest release](https://img.shields.io/github/v/release/darrylmorley/whatcable)](https://github.com/darrylmorley/whatcable/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-blue)](https://github.com/darrylmorley/whatcable)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![WhatCable Pro](https://img.shields.io/badge/WhatCable%20Pro-%C2%A34.99-orange)](https://whatcable.uk/pro)
+[![WhatCable Pro](https://img.shields.io/badge/WhatCable%20Pro-%C2%A39.99-orange)](https://whatcable.uk/pro)
 
 ![WhatCable popover](docs/screenshot.webp)
 
@@ -66,7 +66,7 @@ WhatCable is free and open source. If you find it useful, you can support the pr
 
 One-time purchase, works on up to 2 Macs. See [whatcable.uk/pro](https://whatcable.uk/pro) for details.
 
-[![Buy WhatCable Pro](https://img.shields.io/badge/Buy%20WhatCable%20Pro-%C2%A34.99-orange?style=for-the-badge)](https://whatcable.uk/pro)
+[![Buy WhatCable Pro](https://img.shields.io/badge/Buy%20WhatCable%20Pro-%C2%A39.99-orange?style=for-the-badge)](https://whatcable.uk/pro)
 
 ## Install
 
