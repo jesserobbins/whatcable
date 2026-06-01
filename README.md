@@ -46,7 +46,7 @@ Click the **gear icon** in the popover header to open Settings, where you can:
 - Run as a regular Dock app instead of a menu bar icon
 - Adjust the font size
 - Show technical details (the same raw IOKit data that ⌥-click reveals)
-- Switch language (English, Armenian, Brazilian Portuguese, French, German, Hindi, Italian, Japanese, Latvian, Norwegian, Polish, Russian, Simplified Chinese, Traditional Chinese, or follow your system default)
+- Switch language (English, Armenian, Brazilian Portuguese, French, German, Hindi, Italian, Japanese, Korean, Latvian, Norwegian, Polish, Russian, Simplified Chinese, Spanish, Traditional Chinese, or follow your system default)
 - Get notifications when cables are connected or disconnected
 - Contribute anonymised port and power diagnostics to improve hardware coverage (opt-in, manual)
 
@@ -300,6 +300,7 @@ Built by [Darryl Morley](https://github.com/darrylmorley).
 - [@bovirus](https://github.com/bovirus) - Italian translation
 - [@Vardan933](https://github.com/Vardan933) - Armenian translation
 - [@jimmyorz](https://github.com/jimmyorz) - Traditional Chinese translation
+- [@dohun0310](https://github.com/dohun0310) - Korean translation
 - [@shpokas](https://github.com/shpokas) - Latvian translation
 - [@abrauchli](https://github.com/abrauchli) - screenshot fix
 - [@durul](https://github.com/durul) - updater security audit
