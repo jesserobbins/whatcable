@@ -20,6 +20,7 @@
     { "label": "Blog", "href": "/blog" },
     { "label": "Pro", "href": "/pro" },
     { "label": "Support", "href": "/support" },
+    { "label": "Press", "href": "/press" },
     { "label": "Privacy", "href": "/privacy" },
     {
       "label": "View source on GitHub",

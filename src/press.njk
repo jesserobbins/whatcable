@@ -1,0 +1,111 @@
+---
+permalink: /press.html
+layout: page.njk
+title: "Press"
+documentTitle: "Press — WhatCable"
+description: "Press resources for WhatCable, the free, open-source macOS menu bar app that shows what each USB-C cable can actually do. Coverage, boilerplate, assets, and press contact."
+extraHead: |
+  <style>
+    .press-page section { margin: 0 0 44px; }
+    .press-page h2 { font-size: 1.05rem; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted, #6b7280); margin: 0 0 16px; }
+    .press-page .lede { font-size: 1.15rem; line-height: 1.6; max-width: 56ch; }
+    .press-page .lede a { white-space: nowrap; }
+    .press-page .also-on { font-size: 0.95rem; color: var(--muted, #6b7280); margin: 14px 0 0; }
+
+    /* Featured-in logo strip: greyscale, colour on hover. */
+    .featured-logos { display: flex; flex-wrap: wrap; align-items: center; gap: 28px 40px; }
+    .featured-logos a, .featured-logos span { display: inline-flex; align-items: center; }
+    .featured-logos img {
+      height: 32px; width: auto; display: block;
+      filter: grayscale(1); opacity: 0.65;
+      transition: filter 0.15s ease, opacity 0.15s ease;
+    }
+    .featured-logos a:hover img { filter: grayscale(0); opacity: 1; }
+    .featured-logos img[alt="MakeUseOf"] { height: 96px; }
+    .featured-logos img[alt="Lifehacker"], .featured-logos img[alt="Adafruit"] { height: 38px; }
+
+    /* International coverage list. */
+    .coverage { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; max-width: 64ch; }
+    .coverage li { line-height: 1.5; }
+    .coverage .flag { margin-right: 8px; }
+    .coverage .country { font-weight: 600; }
+
+    .kit-assets { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .kit-shots { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+    .kit-shots img { width: 220px; max-width: 45%; height: auto; border-radius: 8px; border: 1px solid var(--line-soft, #e5e7eb); }
+
+    @media (max-width: 560px) {
+      .featured-logos { gap: 22px 30px; }
+      .featured-logos img { height: 26px; }
+      .featured-logos img[alt="MakeUseOf"] { height: 64px; }
+      .kit-shots img { max-width: 100%; width: 100%; }
+    }
+  </style>
+---
+
+<div class="press-page">
+
+  <section>
+    <p class="lede">
+      WhatCable is a free, open-source macOS menu bar app that tells you what each
+      USB-C cable plugged into your Mac can actually do. Built by Darryl Morley.
+      For press enquiries: <a href="mailto:hello@whatcable.uk">hello@whatcable.uk</a>
+    </p>
+  </section>
+
+  <section>
+    <h2>As featured in</h2>
+    <div class="featured-logos">
+      <!-- The Verge: add logo + link here when the piece is live. -->
+      <a href="https://lifehacker.com/tech/whatcable-mac-app" rel="noopener"><img src="/press/lifehacker.png" alt="Lifehacker"></a>
+      <a href="https://boingboing.net/2026/05/05/whatcable-tells-you-what-that-usb-c-cable-is-good-for.html" rel="noopener"><img src="/press/boingboing.png" alt="Boing Boing"></a>
+      <a href="https://www.makeuseof.com/this-free-app-tells-me-exactly-what-my-usb-cables-can-do/" rel="noopener"><img src="/press/makeuseof.webp" alt="MakeUseOf"></a>
+      <a href="https://blog.adafruit.com/2026/05/04/a-mac-app-to-answer-what-can-this-usb-c-cable-actually-do/" rel="noopener"><img src="/press/adafruit.png" alt="Adafruit"></a>
+    </div>
+    <p class="also-on">Also on <a href="https://mac.softpedia.com/get/System-Utilities/WhatCable.shtml" rel="noopener">Softpedia</a>.</p>
+  </section>
+
+  <section>
+    <h2>International coverage</h2>
+    <ul class="coverage">
+      <li><span class="flag">🇫🇷</span><span class="country">France:</span> <a href="https://www.macg.co/logiciels/2026/05/whatcable-donne-des-informations-sur-les-prises-usb-de-votre-mac-308421" rel="noopener">MacGeneration</a></li>
+      <li><span class="flag">🇩🇪</span><span class="country">Germany:</span> <a href="https://www.ifun.de/whatcable-analysiert-usb-c-und-thunderbolt-kabel-280740/" rel="noopener">iFun.de</a>, <a href="https://stadt-bremerhaven.de/usb-c-whatcable-bringt-licht-ins-kabel-chaos-unter-macos/" rel="noopener">Stadt Bremerhaven</a>, <a href="https://borncity.com/news/whatcable-neues-tool-macht-usb-c-kabel-durchschaubar/" rel="noopener">BornCity</a></li>
+      <li><span class="flag">🇮🇹</span><span class="country">Italy:</span> <a href="https://spider-mac.com/2026/05/20/recensione-whatcable-app-info-cavi-usb-c-mac/" rel="noopener">Spider-Mac</a>, <a href="https://www.melamorsicata.it/2026/05/12/whatcable-app-mac-cavi-usb-c/" rel="noopener">Melamorsicata</a>, <a href="https://www.ilsoftware.it/focus/caratteristiche-cavi-usb-macos/" rel="noopener">IlSoftware.it</a></li>
+      <li><span class="flag">🇪🇸</span><span class="country">Spain:</span> <a href="https://www.microsiervos.com/archivo/ordenadores/whatcabpe-app-cables-usb-c-mac.html" rel="noopener">Microsiervos</a></li>
+      <li><span class="flag">🇦🇺</span><span class="country">Australia:</span> <a href="https://automatica.com.au/2026/05/whatcable-know-what-your-usb-c-cable-can-really-do/" rel="noopener">Automatica</a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>About the app</h2>
+    <p>
+      WhatCable reads USB-C cable data from the IOKit registry using Apple's public
+      APIs, no root access, no SIP changes, no private entitlements. It shows charging
+      speed, data rate, Thunderbolt support, e-marker data, and identifies where the
+      bottleneck is. Free and open source (MIT licence). Optional Pro tier at £9.99
+      one-time. Requires Apple Silicon, macOS 14 or later.
+    </p>
+  </section>
+
+  <section>
+    <h2>Press kit</h2>
+    <ul class="kit-assets">
+      <li><a href="/press/whatcable-icon-1024.png">App icon</a> (1024&times;1024 PNG)</li>
+      <li><a href="https://github.com/darrylmorley/whatcable" rel="noopener">Source on GitHub</a></li>
+    </ul>
+    <div class="kit-shots">
+      <img src="/screenshot.webp" alt="WhatCable menu bar popover" loading="lazy">
+      <img src="/screenshot-diagnostics.webp" alt="WhatCable Diagnostics screen" loading="lazy">
+      <img src="/screenshot-power-monitor.webp" alt="WhatCable Power Monitor" loading="lazy">
+    </div>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <p>
+      For press enquiries, interviews, or review copies of Pro:
+      <a href="mailto:hello@whatcable.uk">hello@whatcable.uk</a>
+    </p>
+  </section>
+
+</div>
