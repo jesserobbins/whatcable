@@ -620,6 +620,81 @@ struct PortSummaryTests {
         #expect(deviceBullet!.contains("PD") == false, "Should not show PD revision when unknown")
     }
 
+    // MARK: - Charger answering Discover Identity as a cable (issue #268)
+
+    /// A charging SOP partner that declares a cable product type must be shown
+    /// as the charger, never echoed back as a passive cable / connected device,
+    /// with its PD revision preserved.
+    @Test("SOP partner claiming to be a cable while charging is shown as the charger")
+    func sopCablePartnerWhileChargingIsRelabelledAsCharger() {
+        // Issue #268: an Anker Prime 165W charger answered Discover Identity at
+        // SOP with product-type 3 (passive cable). On a charger-only port the
+        // card showed "Connected device: Passive cable, Anker ..." under the
+        // "Cable details" heading, which read as if the cable were an Anker
+        // passive cable. A device sourcing power can't be a passive cable, so
+        // we relabel it as the charger. No adapter manufacturer here, so the
+        // relabel path (not the suppress path) fires.
+        let port = makePort(connected: true, active: [], supported: ["CC"])
+        let partner = USBPDSOP(
+            id: 50, endpoint: .sop,
+            parentPortType: 2, parentPortNumber: 1,
+            vendorID: 0x291A, productID: 0, bcdDevice: 0,
+            vdos: [(3 << 27) | UInt32(0x291A)],  // product type 3 = passive cable
+            specRevision: 3
+        )
+        let summary = PortSummary(
+            port: port,
+            sources: [usbPD(maxW: 100, winningW: 100)],
+            identities: [partner]
+        )
+        let chargerLine = summary.bullets.first { $0.contains("Charger identified as") }
+        #expect(chargerLine != nil, "Expected a 'Charger identified as' line, got: \(summary.bullets)")
+        #expect(chargerLine!.contains("0x291A"), "Expected the partner VID, got: \(chargerLine!)")
+        #expect(chargerLine!.contains("PD 3.0"), "PD revision should be preserved, got: \(chargerLine!)")
+        #expect(
+            !summary.bullets.contains(where: { $0.contains("Passive cable") }),
+            "A charger must not be labelled a passive cable, got: \(summary.bullets)"
+        )
+        #expect(
+            !summary.bullets.contains(where: { $0.contains("Connected device") }),
+            "The charger must not appear as a connected device, got: \(summary.bullets)"
+        )
+    }
+
+    /// When AdapterDetails already gives a richer "Charger: <mfr> <name>" line,
+    /// the relabelled cable-partner line is suppressed so only one charger line
+    /// appears.
+    @Test("SOP cable-partner while charging is suppressed when a richer Charger line fires")
+    func sopCablePartnerSuppressedWhenAdapterPresent() {
+        // Same self-contradicting partner, but AdapterDetails gives a richer
+        // "Charger: <mfr> <name>" line. The partner line must be suppressed so
+        // we don't print two charger lines (mirrors the federated branch).
+        let port = makePort(connected: true, active: [], supported: ["CC"])
+        let partner = USBPDSOP(
+            id: 50, endpoint: .sop,
+            parentPortType: 2, parentPortNumber: 1,
+            vendorID: 0x05AC, productID: 0, bcdDevice: 0,
+            vdos: [(3 << 27) | UInt32(0x05AC)],  // product type 3 = passive cable
+            specRevision: 3
+        )
+        let summary = PortSummary(
+            port: port,
+            sources: [usbPD(maxW: 140, winningW: 140)],
+            identities: [partner],
+            adapter: adapter(manufacturer: "Apple Inc.", name: "140W USB-C Power Adapter")
+        )
+        let chargerLines = summary.bullets.filter {
+            $0.starts(with: "Charger:") || $0.contains("Charger identified as")
+        }
+        #expect(chargerLines.count == 1,
+            "Expected exactly one charger line (the richer one), got: \(chargerLines)")
+        #expect(chargerLines.first == "Charger: Apple Inc. 140W USB-C Power Adapter")
+        #expect(
+            !summary.bullets.contains(where: { $0.contains("Passive cable") || $0.contains("Connected device") }),
+            "No passive-cable / connected-device line expected, got: \(summary.bullets)"
+        )
+    }
+
     // MARK: - Unknown state enrichment
 
     @Test("Unknown with SOP partner shows e-marker bullet")

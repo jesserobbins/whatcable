@@ -405,8 +405,17 @@ private struct DeviceDTO: Codable {
     let productID: Int
     let pdRevision: String?
 
+    /// Builds the JSON view of a port partner from its USB-PD SOP identity,
+    /// reporting the product type, vendor, product ID, and PD revision exactly
+    /// as advertised on the wire.
     init(identity: USBPDSOP) {
         let header = identity.idHeader
+        // `kind` is the partner's product type exactly as advertised in its PD
+        // ID header. This is intentionally the raw value: the JSON feed is
+        // faithful to the wire. The human-facing PortSummary applies a smarter
+        // rule (a power source claiming to be a passive cable is shown as the
+        // charger, see issue #268), so `device.kind` here can read "Passive
+        // cable" for a port whose card/CLI bullet says "Charger identified as".
         self.kind = header.map {
             $0.ufpProductType != .undefined ? $0.ufpProductType.label : $0.dfpProductType.label
         }

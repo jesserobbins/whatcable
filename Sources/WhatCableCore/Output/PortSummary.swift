@@ -195,12 +195,31 @@ extension PortSummary {
         // Partner identity (SOP): what's connected.
         if let partner = identities.first(where: { $0.endpoint == .sop }),
            let header = partner.idHeader {
-            let kind = header.ufpProductType != .undefined ? header.ufpProductType.label : header.dfpProductType.label
             let vendor = VendorDB.label(for: partner.vendorID)
-            if let pdRev = partner.pdRevisionLabel {
-                bullets.append(String(localized: "Connected device: \(kind), \(vendor) (\(pdRev))", bundle: _coreLocalizedBundle))
+            if header.isCable && chargingSource != nil {
+                // A device sourcing power on this port cannot be a passive or
+                // active cable. Chargers routinely fill the PD ID-header
+                // product-type field with junk (USB-PD has no "charger" product
+                // type), so a charger can answer Discover Identity claiming to
+                // be a "passive cable". Don't echo that back as the connected
+                // device; treat it as the charger, mirroring the
+                // federated-identity branch below. See issue #268.
+                if !adapterIdentityWillFire {
+                    // Keep the PD revision inside the single %@ argument so the
+                    // info isn't dropped and no new localised key is needed.
+                    let label = partner.pdRevisionLabel.map { "\(vendor) (\($0))" } ?? vendor
+                    bullets.append(String(localized: "Charger identified as \(label)", bundle: _coreLocalizedBundle))
+                }
+                // If adapterIdentityWillFire, a richer "Charger: <mfr> <name>"
+                // line is coming later; skip to avoid a double charger line
+                // (mirrors the federated branch's guard).
             } else {
-                bullets.append(String(localized: "Connected device: \(kind), \(vendor)", bundle: _coreLocalizedBundle))
+                let kind = header.ufpProductType != .undefined ? header.ufpProductType.label : header.dfpProductType.label
+                if let pdRev = partner.pdRevisionLabel {
+                    bullets.append(String(localized: "Connected device: \(kind), \(vendor) (\(pdRev))", bundle: _coreLocalizedBundle))
+                } else {
+                    bullets.append(String(localized: "Connected device: \(kind), \(vendor)", bundle: _coreLocalizedBundle))
+                }
             }
         } else if let portNum = port.portNumber,
                   let fed = federatedIdentities.first(where: { $0.portIndex == portNum }),
