@@ -96,8 +96,19 @@ extraHead: |
       WhatCable reads USB-C cable data from the IOKit registry using Apple's public
       APIs, no root access, no SIP changes, no private entitlements. It shows charging
       speed, data rate, Thunderbolt support, e-marker data, and identifies where the
-      bottleneck is. Free and open source (MIT licence). Optional Pro tier at £9.99
-      one-time. Requires Apple Silicon, macOS 14 or later.
+      bottleneck is. Free and open source (MIT licence), with
+      <a href="https://github.com/darrylmorley/whatcable/stargazers" rel="noopener"><span data-gh-stars>5.3k</span> stars on GitHub</a>.
+      Optional Pro tier at £9.99 one-time. Requires Apple Silicon, macOS 14 or later.
+    </p>
+  </section>
+
+  <section>
+    <h2>About the developer</h2>
+    <p>
+      Darryl Morley is a self-taught developer based in the UK. He works in e-commerce
+      by day and builds Mac software in his spare time under Bitmoor Ltd. WhatCable started
+      as a tool to answer a question he kept asking himself, which of these identical-looking
+      cables actually does the thing, and turned into something other people wanted too.
     </p>
   </section>
 
@@ -105,6 +116,7 @@ extraHead: |
     <h2>Press kit</h2>
     <ul class="kit-assets">
       <li><a href="/press/whatcable-icon-1024.png">App icon</a> (1024&times;1024 PNG)</li>
+      <li><a href="{{ site.downloadUrl }}" download>Download WhatCable</a> (latest release, .zip)</li>
       <li><a href="https://github.com/darrylmorley/whatcable" rel="noopener">Source on GitHub</a></li>
     </ul>
     <div class="kit-shots">
@@ -127,3 +139,20 @@ extraHead: |
   </section>
 
 </div>
+
+<script>
+  // Replace the hardcoded star count with the live figure from GitHub.
+  // Falls back silently to the "5.3k" already in the markup if the call
+  // fails or the visitor is rate-limited (GitHub allows 60/hour per IP).
+  fetch("https://api.github.com/repos/darrylmorley/whatcable")
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function (data) {
+      var n = data.stargazers_count;
+      if (typeof n !== "number") return;
+      var label = n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "k" : String(n);
+      document.querySelectorAll("[data-gh-stars]").forEach(function (el) {
+        el.textContent = label;
+      });
+    })
+    .catch(function () {});
+</script>
