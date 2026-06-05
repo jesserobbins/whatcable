@@ -15,7 +15,7 @@
 "Connected devices" = "Միացված սարքեր";
 "Connected: %@" = "Միացված է՝ %@";
 "Connection" = "Կապ";
-"Desktop Mac: charger identity (FedDetails) is not available." = "Desktop Mac: charger identity (FedDetails) is not available.";
+"Desktop Mac: charger identity (FedDetails) is not available." = "Աշխատասեղանային Mac. լիցքավորիչի ինքնությունը (FedDetails) հասանելի չէ:";
 "Display" = "Էկրան";
 "Done" = "Կատարված է";
 "Downloading…" = "Ներբեռնվում է";
@@ -29,7 +29,7 @@
 "Install update" = "Տեղադրել թարմացումը";
 "Installing, WhatCable will relaunch" = "Տեղադրվում է. WhatCable-ը կվերագործարկվի";
 "Keep window open" = "Պատուհանը բաց թողնել";
-"Language" = "Language";
+"Language" = "Լեզու";
 "Launch at login" = "Գործարկել համակարգ մուտք գործելիս";
 "Lives in the menu bar with no Dock icon." = "Գտնվում է մենյուի տողում՝ առանց Dock-ի պատկերակի:";
 "No" = "Ոչ";
@@ -49,7 +49,7 @@
 "Refresh" = "Թարմացնել";
 "Report this cable" = "Զեկուցել այս կաբելի մասին";
 "Runs as a regular Dock app with a window." = "Աշխատում է որպես սովորական հավելված՝ Dock-ում և պատուհանով:";
-"System Default" = "System Default";
+"System Default" = "Համակարգի կանխադրված";
 "Settings" = "Կարգավորումներ";
 "Settings…" = "Կարգավորումներ…";
 "Show in menu bar" = "Ցուցադրել մենյուի տողում";
@@ -70,7 +70,7 @@
 "WhatCable on GitHub" = "Բացել GitHub-ում";
 "Yes" = "Այո";
 "You're on %@" = "Դուք օգտագործում եք %@ տարբերակը";
-"%lld USB devices" = "%lld USB devices";
+"%lld USB devices" = "%lld USB սարք";
 "active" = "ակտիվ";
 "no active link" = "ակտիվ կապ չկա";
 
@@ -83,35 +83,35 @@
 "Privacy" = "Գաղտնիություն";
 "Pro" = "Pro";
 "Proceed" = "Շարունակել";
-"Raw IOKit registry properties for each USB-C port, the model and capabilities of any connected display (its EDID, with the serial number removed), your macOS version, and chip type. This is the same data visible in System Information." = "Raw IOKit registry properties for each USB-C port, the model and capabilities of any connected display (its EDID, with the serial number removed), your macOS version, and chip type. This is the same data visible in System Information.";
+"Raw IOKit registry properties for each USB-C port, the model and capabilities of any connected display (its EDID, with the serial number removed), your macOS version, and chip type. This is the same data visible in System Information." = "Հում IOKit ռեեստրի հատկություններ յուրաքանչյուր USB-C պորտի համար, միացված ցանկացած էկրանի մոդելն ու հնարավորությունները (EDID՝ սերիական համարն հանված), macOS-ի տարբերակն ու չիպի տեսակը: Սա System Information-ում տեսանելի տվյալների հետ նույնն է:";
 "What happens" = "Ինչ է տեղի ունենում";
 "What is collected" = "Ինչ է հավաքվում";
 "WhatCable runs 17 IOKit probes that read raw USB-C and Thunderbolt data from your Mac's port controller registers. The results are sent to a secure server to help improve cable and port detection." = "WhatCable-ը գործարկում է 17 IOKit զոնդ, որոնք կարդում են անմշակ USB-C և Thunderbolt տվյալներ ձեր Mac-ի պորտի կարգավորիչի ռեգիստրներից: Արդյունքներն ուղարկվում են ապահով սերվեր՝ մալուխների և պորտերի հայտնաբերումը բարելավելու համար:";
 "Your machine's hardware UUID is hashed with SHA-256 before sending. No names, accounts, serial numbers, or personal data are collected or stored." = "Ձեր մեքենայի սարքակազմի UUID-ն հեշավորվում է SHA-256-ով նախքան ուղարկելը: Ոչ մի անուն, հաշիվ, սերիական համար կամ անձնական տվյալ չի հավաքվում կամ պահվում:";
 
 /* Negotiation diagnostics + Pro UX (PR #55). English; non-English to be refined by the community translation flow. */
-"Back" = "Back";
-"Unpin (popover closes when you click away)" = "Unpin (popover closes when you click away)";
-"Open in a separate window" = "Open in a separate window";
-"Power Monitor" = "Power Monitor";
-"Negotiation Diagnostics" = "Negotiation Diagnostics";
-"Cable Diagnostics" = "Cable Diagnostics";
-"%@ Port %lld Diagnostics" = "%@ Port %lld Diagnostics";
+"Back" = "Հետ";
+"Unpin (popover closes when you click away)" = "Ապամագնիսել (ելնող պատուհանը փակվում է, երբ կտտացնում եք դրսում)";
+"Open in a separate window" = "Բացել առանձին պատուհանում";
+"Power Monitor" = "Հոսանքի մոնիտոր";
+"Negotiation Diagnostics" = "Բանակցությունների ախտորոշում";
+"Cable Diagnostics" = "Մալուխի ախտորոշում";
+"%@ Port %lld Diagnostics" = "%@ Պորտ %lld ախտորոշում";
 
 /* Onboarding / welcome screen (first launch). English placeholders; Armenian to be refined by the community. */
-"Welcome to WhatCable" = "Welcome to WhatCable";
-"See what your USB-C cables, chargers, and devices can actually do." = "See what your USB-C cables, chargers, and devices can actually do.";
-"How would you like to use WhatCable?" = "How would you like to use WhatCable?";
-"Menu bar" = "Menu bar";
-"Sits in the menu bar at the top of your screen. Click the cable icon any time to check a connection." = "Sits in the menu bar at the top of your screen. Click the cable icon any time to check a connection.";
-"Recommended" = "Recommended";
-"Dock app" = "Dock app";
-"Opens as a regular window with a Dock icon, like most apps." = "Opens as a regular window with a Dock icon, like most apps.";
-"Get Started" = "Get Started";
-"You can change this any time in Settings." = "You can change this any time in Settings.";
+"Welcome to WhatCable" = "Բարի գալուստ WhatCable";
+"See what your USB-C cables, chargers, and devices can actually do." = "Տեսեք, թե ձեր USB-C մալուխները, լիցքավորիչները և սարքերն իրականում ինչ կարող են անել:";
+"How would you like to use WhatCable?" = "Ինչպե՞ս եք ցանկանում օգտագործել WhatCable-ը:";
+"Menu bar" = "Ընտրացանկի տող";
+"Sits in the menu bar at the top of your screen. Click the cable icon any time to check a connection." = "Տեղակայված է էկրանի վերևի ընտրացանկի տողում: Ցանկացած պահի կտտացրեք մալուխի պատկերակին կապը ստուգելու համար:";
+"Recommended" = "Առաջարկվում է";
+"Dock app" = "Dock հավելված";
+"Opens as a regular window with a Dock icon, like most apps." = "Բացվում է որպես սովորական պատուհան՝ Dock-ում պատկերակով, ինչպես մյուս հավելվածները:";
+"Get Started" = "Սկսել";
+"You can change this any time in Settings." = "Կարող եք փոխել սա ցանկացած պահի Կարգավորումներում:";
 
 /* Billboard device (display dimension). English; community-refined. */
-"Billboard device present" = "Billboard device present";
+"Billboard device present" = "Billboard սարք հայտնաբերված է";
 
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Մալուխի նշում";

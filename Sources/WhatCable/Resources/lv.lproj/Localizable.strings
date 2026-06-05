@@ -82,7 +82,7 @@
 "Privacy" = "Privātums";
 "Pro" = "Pro";
 "Proceed" = "Turpināt";
-"Raw IOKit registry properties for each USB-C port, the model and capabilities of any connected display (its EDID, with the serial number removed), your macOS version, and chip type. This is the same data visible in System Information." = "Raw IOKit registry properties for each USB-C port, the model and capabilities of any connected display (its EDID, with the serial number removed), your macOS version, and chip type. This is the same data visible in System Information.";
+"Raw IOKit registry properties for each USB-C port, the model and capabilities of any connected display (its EDID, with the serial number removed), your macOS version, and chip type. This is the same data visible in System Information." = "Neapstrādātas IOKit reģistra īpašības katram USB-C portam, jebkura pievienota displeja modelis un iespējas (tā EDID ar noņemtu sērijas numuru), jūsu macOS versija un mikroshēmas veids. Šie ir tie paši dati, kas redzami Sistēmas informācijā.";
 "What happens" = "Kas notiek";
 "What is collected" = "Kas tiek ievākts";
 "WhatCable runs 17 IOKit probes that read raw USB-C and Thunderbolt data from your Mac's port controller registers. The results are sent to a secure server to help improve cable and port detection." = "WhatCable veic 17 IOKit zondējumus, kas nolasa neapstrādātus USB-C un Thunderbolt datus no jūsu Mac porta kontrollera reģistriem. Rezultāti tiek nosūtīti uz drošu serveri, lai palīdzētu uzlabot kabeļu un portu noteikšanu.";
@@ -110,7 +110,7 @@
 "You can change this any time in Settings." = "To var mainīt jebkurā laikā iestatījumos.";
 
 /* Billboard device (display dimension). English; community-refined. */
-"Billboard device present" = "Billboard device present";
+"Billboard device present" = "Klātesošā Billboard ierīce";
 
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Piezīme par kabeli";

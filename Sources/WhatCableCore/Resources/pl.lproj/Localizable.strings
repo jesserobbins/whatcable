@@ -1,5 +1,5 @@
-"0.2-0.5 mW" = "0.2-0.5 mW";
-"0.5-1 mW" = "0.5-1 mW";
+"0.2-0.5 mW" = "0,2-0,5 mW";
+"0.5-1 mW" = "0,5-1 mW";
 "1-5 mW" = "1-5 mW";
 "3 A" = "3 A";
 "5 A" = "5 A";
@@ -25,9 +25,9 @@
 "Carrying DisplayPort video" = "Przesyła wideo DisplayPort";
 "Carrying both data and DisplayPort video." = "Przesyła jednocześnie dane i wideo DisplayPort.";
 "Charger advertises up to %lldW" = "Ładowarka deklaruje do %lldW";
-"Charger: %@" = "Charger: %@";
-"Charger: %@ %@" = "Charger: %1$@ %2$@";
-"Charger identified as %@" = "Charger identified as %@";
+"Charger: %@" = "Ładowarka: %@";
+"Charger: %@ %@" = "Ładowarka: %1$@ %2$@";
+"Charger identified as %@" = "Ładowarka zidentyfikowana jako %@";
 "Charger and cable are well-matched." = "Ładowarka i kabel są dobrze dopasowane.";
 "Charger can deliver up to %lldW, but this cable is only rated to carry %lldW. Replace the cable to charge faster." = "Ładowarka może dostarczyć do %1$lldW, ale ten kabel jest przystosowany tylko do %2$lldW. Wymień kabel, aby ładować szybciej.";
 "Charging" = "Ładowanie";
@@ -100,8 +100,8 @@
 "USB 2.0 only (480 Mbps), no high-speed data" = "Tylko USB 2.0 (480 Mbps), brak szybkich danych";
 "USB 3.2 Gen 1 (5 Gbps)" = "USB 3.2 Gen 1 (5 Gbps)";
 "USB 3.2 Gen 2 (10 Gbps)" = "USB 3.2 Gen 2 (10 Gbps)";
-"USB Hub" = "USB Hub";
-"USB Peripheral" = "USB Peripheral";
+"USB Hub" = "Hub USB";
+"USB Peripheral" = "Urządzenie peryferyjne USB";
 "USB default" = "USB domyślne";
 "USB device" = "Urządzenie USB";
 "USB device · %lldW charger" = "Urządzenie USB · ładowarka %lldW";
@@ -129,7 +129,7 @@
 "Connected device: %@" = "Podłączone urządzenie: %@";
 "Connected device: %@, %@ (%@)" = "Podłączone urządzenie: %1$@, %2$@ (%3$@)";
 "Data" = "Dane";
-"DisplayPort Alt Mode" = "DisplayPort Alt Mode";
+"DisplayPort Alt Mode" = "Tryb alternatywny DisplayPort";
 
 /* Cable speed / charger status strings (previously missing keys) */
 "20 Gbps capable" = "Obsługa 20 Gbps";
@@ -205,7 +205,7 @@
 "Link rate" = "Prędkość łącza";
 "Liquid Detection" = "Wykrywanie cieczy";
 "Liquid detected" = "Wykryto ciecz";
-"Live" = "Live";
+"Live" = "Na żywo";
 "MagSafe 3" = "MagSafe 3";
 "MagSafe Charger" = "Ładowarka MagSafe";
 "Manufacturer" = "Producent";
@@ -292,7 +292,7 @@
 "Unstructured VDM enumeration began (discovering vendor-specific capabilities)." = "Rozpoczęto wyliczanie niestrukturalnego VDM (wykrywanie możliwości specyficznych dla producenta).";
 "Unstructured VDM status changed (vendor-specific messaging like Alt Mode setup)." = "Zmienił się stan niestrukturalnego VDM (komunikaty specyficzne dla producenta, jak konfiguracja Alt Mode).";
 "VDO fail count" = "Liczba błędów VDO";
-"Vendor ID" = "Vendor ID";
+"Vendor ID" = "ID producenta";
 "Vendor-specific unstructured VDM state changed. Used by Apple for custom Alt Mode setup and Thunderbolt negotiation." = "Zmienił się stan niestrukturalnego VDM specyficznego dla producenta. Używane przez Apple do niestandardowej konfiguracji Alt Mode i negocjacji Thunderbolt.";
 "Voltage" = "Napięcie";
 "Voltage (V)" = "Napięcie (V)";
@@ -326,93 +326,93 @@
 "See what your USB-C cables can do at a glance." = "Zobacz na pierwszy rzut oka, co potrafią Twoje kable USB-C.";
 
 /* Negotiation diagnostics + Pro UX (PR #55). English; non-English to be refined by the community translation flow. */
-"The cable's e-marker and the Thunderbolt controller disagree on its speed; the controller's reading is treated as authoritative." = "The cable's e-marker and the Thunderbolt controller disagree on its speed; the controller's reading is treated as authoritative.";
-"Running at %@" = "Running at %@";
-"There's no cable e-marker or controller data, and no port or device capability to compare against, so we can't tell whether the cable is the limit." = "There's no cable e-marker or controller data, and no port or device capability to compare against, so we can't tell whether the cable is the limit.";
-"This cable has no e-marker and no controller data, so we can't tell whether it is the limit." = "This cable has no e-marker and no controller data, so we can't tell whether it is the limit.";
-"Running slower than expected (%@)" = "Running slower than expected (%@)";
-"The parts we can see all support %@ or more, but the link came up slower. Reseating the cable or trying another port may help." = "The parts we can see all support %@ or more, but the link came up slower. Reseating the cable or trying another port may help.";
-"Running at full data speed (%@)" = "Running at full data speed (%@)";
-"Nothing is being held back: the parts we can see all support this speed." = "Nothing is being held back: the parts we can see all support this speed.";
-"Cable is limiting data speed" = "Cable is limiting data speed";
-"The Mac and device can do %@, but the cable only carries %@. A faster cable would unlock full speed." = "The Mac and device can do %@, but the cable only carries %@. A faster cable would unlock full speed.";
-"This Mac port limits data speed" = "This Mac port limits data speed";
-"The cable and device can do %@, but this port maxes out at %@." = "The cable and device can do %@, but this port maxes out at %@.";
-"Device runs at %@" = "Device runs at %@";
-"This is the fastest the connected device supports. It is not a cable problem." = "This is the fastest the connected device supports. It is not a cable problem.";
-"Battery full, not charging" = "Battery full, not charging";
-"Charger and cable are fine. The Mac will draw up to %lldW when it needs to." = "Charger and cable are fine. The Mac will draw up to %lldW when it needs to.";
-"Negotiation Diagnostics" = "Negotiation Diagnostics";
-"What each link can do, and where the bottleneck is." = "What each link can do, and where the bottleneck is.";
-"No Connections" = "No Connections";
-"Plug a cable into a port to see what is limiting it." = "Plug a cable into a port to see what is limiting it.";
-"Nothing to diagnose on this port yet (no active power or data link)." = "Nothing to diagnose on this port yet (no active power or data link).";
-"Data speed" = "Data speed";
-"Display links are not analysed yet." = "Display links are not analysed yet.";
-"Mac port" = "Mac port";
-"Cable" = "Cable";
-"Device" = "Device";
-"Negotiated" = "Negotiated";
+"The cable's e-marker and the Thunderbolt controller disagree on its speed; the controller's reading is treated as authoritative." = "E-marker kabla i kontroler Thunderbolt podają różne prędkości; za miarodajny przyjmuje się odczyt kontrolera.";
+"Running at %@" = "Działa z prędkością %@";
+"There's no cable e-marker or controller data, and no port or device capability to compare against, so we can't tell whether the cable is the limit." = "Brak danych e-markera kabla i kontrolera oraz brak informacji o możliwościach portu lub urządzenia, do których można by się odnieść, więc nie można stwierdzić, czy kabel jest ograniczeniem.";
+"This cable has no e-marker and no controller data, so we can't tell whether it is the limit." = "Ten kabel nie ma e-markera ani danych kontrolera, więc nie można stwierdzić, czy jest ograniczeniem.";
+"Running slower than expected (%@)" = "Wolniej niż oczekiwano (%@)";
+"The parts we can see all support %@ or more, but the link came up slower. Reseating the cable or trying another port may help." = "Wszystkie widoczne elementy obsługują %@ lub więcej, ale połączenie ustanowiono z niższą prędkością. Ponowne podłączenie kabla lub wypróbowanie innego portu może pomóc.";
+"Running at full data speed (%@)" = "Działa z pełną prędkością transferu (%@)";
+"Nothing is being held back: the parts we can see all support this speed." = "Nic nie ogranicza połączenia: wszystkie widoczne elementy obsługują tę prędkość.";
+"Cable is limiting data speed" = "Kabel ogranicza prędkość transferu danych";
+"The Mac and device can do %@, but the cable only carries %@. A faster cable would unlock full speed." = "Mac i urządzenie obsługują %@, ale kabel przesyła tylko %@. Szybszy kabel odblokuje pełną prędkość.";
+"This Mac port limits data speed" = "Ten port Maca ogranicza prędkość transferu danych";
+"The cable and device can do %@, but this port maxes out at %@." = "Kabel i urządzenie obsługują %@, ale ten port osiąga maksymalnie %@.";
+"Device runs at %@" = "Urządzenie działa z prędkością %@";
+"This is the fastest the connected device supports. It is not a cable problem." = "To maksymalna prędkość obsługiwana przez podłączone urządzenie. Problem nie leży po stronie kabla.";
+"Battery full, not charging" = "Bateria pełna, nie ładuje";
+"Charger and cable are fine. The Mac will draw up to %lldW when it needs to." = "Ładowarka i kabel działają prawidłowo. Mac będzie pobierał do %lld W w razie potrzeby.";
+"Negotiation Diagnostics" = "Diagnostyka negocjacji";
+"What each link can do, and where the bottleneck is." = "Co każde łącze może zapewnić i gdzie leży wąskie gardło.";
+"No Connections" = "Brak połączeń";
+"Plug a cable into a port to see what is limiting it." = "Podłącz kabel do portu, aby zobaczyć, co go ogranicza.";
+"Nothing to diagnose on this port yet (no active power or data link)." = "Nie ma jeszcze czego diagnozować na tym porcie (brak aktywnego zasilania lub łącza danych).";
+"Data speed" = "Prędkość transferu danych";
+"Display links are not analysed yet." = "Łącza ekranów nie są jeszcze analizowane.";
+"Mac port" = "Port Maca";
+"Cable" = "Kabel";
+"Device" = "Urządzenie";
+"Negotiated" = "Wynegocjowane";
 "Charger" = "Ładowarka";
 "AC Power" = "Zasilanie sieciowe";
-"bottleneck" = "bottleneck";
-"Cable signals disagree" = "Cable signals disagree";
-"an unknown speed" = "an unknown speed";
-"a higher speed" = "a higher speed";
-"The cable's own e-marker reports %@, but the Thunderbolt controller sees %@. This can happen with active Thunderbolt cables that under-report (declaring themselves passive at a low speed) or with suspect cables whose e-markers over-state their capability. The controller's reading is the one used above." = "The cable's own e-marker reports %@, but the Thunderbolt controller sees %@. This can happen with active Thunderbolt cables that under-report (declaring themselves passive at a low speed) or with suspect cables whose e-markers over-state their capability. The controller's reading is the one used above.";
+"bottleneck" = "wąskie gardło";
+"Cable signals disagree" = "Sygnały kabla są rozbieżne";
+"an unknown speed" = "nieznana prędkość";
+"a higher speed" = "wyższa prędkość";
+"The cable's own e-marker reports %@, but the Thunderbolt controller sees %@. This can happen with active Thunderbolt cables that under-report (declaring themselves passive at a low speed) or with suspect cables whose e-markers over-state their capability. The controller's reading is the one used above." = "Własny e-marker kabla podaje %@, ale kontroler Thunderbolt widzi %@. Może się to zdarzyć przy aktywnych kablach Thunderbolt, które zaniżają swoje możliwości (deklarując się jako pasywne z niską prędkością), lub przy podejrzanych kablach, których e-markery zawyżają możliwości. Powyżej używany jest odczyt kontrolera.";
 /* Pro overview screen + footer pill (Pro funnel). Parity placeholders in English; refine in the community translation flow. */
-"Cable Diagnostics" = "Cable Diagnostics";
-"Deep per-port pin maps, plug orientation, and protocol detail." = "Deep per-port pin maps, plug orientation, and protocol detail.";
-"Licence Key" = "Licence Key";
-"Live MagSafe pin layout for charging and diagnostics." = "Live MagSafe pin layout for charging and diagnostics.";
-"Live multi-port power graphs and event history." = "Live multi-port power graphs and event history.";
-"MagSafe pin diagrams" = "MagSafe pin diagrams";
-"Manage Licence…" = "Manage Licence…";
-"See exactly what each link can do, and where the bottleneck is." = "See exactly what each link can do, and where the bottleneck is.";
-"Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription." = "Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription.";
-"Cable says %@, link reads %@" = "Cable says %@, link reads %@";
-"The cable's e-marker reports %@, but the active link is reading %@. One of those readings is wrong, and without a Thunderbolt controller cross-check we can't tell which. Trying a known-good cable will identify the culprit." = "The cable's e-marker reports %@, but the active link is reading %@. One of those readings is wrong, and without a Thunderbolt controller cross-check we can't tell which. Trying a known-good cable will identify the culprit.";
+"Cable Diagnostics" = "Diagnostyka kabla";
+"Deep per-port pin maps, plug orientation, and protocol detail." = "Szczegółowe mapy pinów dla każdego portu, orientacja wtyczki i szczegóły protokołu.";
+"Licence Key" = "Klucz licencji";
+"Live MagSafe pin layout for charging and diagnostics." = "Aktualny układ pinów MagSafe do ładowania i diagnostyki.";
+"Live multi-port power graphs and event history." = "Aktualne wykresy zasilania wielu portów i historia zdarzeń.";
+"MagSafe pin diagrams" = "Schematy pinów MagSafe";
+"Manage Licence…" = "Zarządzaj licencją…";
+"See exactly what each link can do, and where the bottleneck is." = "Sprawdź dokładnie, co każde łącze może zapewnić i gdzie leży wąskie gardło.";
+"Unlock deep diagnostics, live power graphs, and per-port history. One-off licence, no subscription." = "Odblokuj zaawansowaną diagnostykę, aktualne wykresy zasilania i historię dla każdego portu. Jednorazowa licencja, bez subskrypcji.";
+"Cable says %@, link reads %@" = "Kabel podaje %@, łącze odczytuje %@";
+"The cable's e-marker reports %@, but the active link is reading %@. One of those readings is wrong, and without a Thunderbolt controller cross-check we can't tell which. Trying a known-good cable will identify the culprit." = "E-marker kabla podaje %@, ale aktywne łącze odczytuje %@. Jeden z tych odczytów jest błędny, a bez weryfikacji przez kontroler Thunderbolt nie można stwierdzić który. Wypróbowanie sprawdzonego kabla pozwoli wskazać winowajcę.";
 
 /* Display dimension. English; non-English to be refined by the community translation flow. */
-"A display is connected but its capabilities aren't readable, so there's nothing to compare the link against." = "A display is connected but its capabilities aren't readable, so there's nothing to compare the link against.";
-"The link is carrying about %@ (%lld of %lld lanes)." = "The link is carrying about %@ (%lld of %lld lanes).";
-"display" = "display";
-"Your %@ is connected, but the link rate isn't readable, so there's nothing to compare its capability against." = "Your %@ is connected, but the link rate isn't readable, so there's nothing to compare its capability against.";
-"Display running at full quality" = "Display running at full quality";
-"Your %@ is connected and the link has the bandwidth for its top mode. Nothing is holding the picture back." = "Your %@ is connected and the link has the bandwidth for its top mode. Nothing is holding the picture back.";
-"%lld of %lld lanes at %@" = "%lld of %lld lanes at %@";
-"%lld of %lld lanes" = "%lld of %lld lanes";
-"up to %lldHz" = "up to %lldHz";
-"a higher mode than the link is carrying" = "a higher mode than the link is carrying";
-"This estimate assumes standard colour; a display using compression (DSC) may reach more." = "This estimate assumes standard colour; a display using compression (DSC) may reach more.";
-"Video is going through a %@ adapter" = "Video is going through a %@ adapter";
-"Your %@ is reached through a USB-C to %@ adapter, and the link isn't currently carrying the monitor's top mode (%@, about %@); it's carrying about %@ (%@). With an adapter in the chain, the adapter's own limit may be the cap rather than the cable. Trying the monitor over native DisplayPort, or a higher-spec adapter, would tell you which." = "Your %@ is reached through a USB-C to %@ adapter, and the link isn't currently carrying the monitor's top mode (%@, about %@); it's carrying about %@ (%@). With an adapter in the chain, the adapter's own limit may be the cap rather than the cable. Trying the monitor over native DisplayPort, or a higher-spec adapter, would tell you which.";
-"Monitor can do more than the link is carrying" = "Monitor can do more than the link is carrying";
-"Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). If you've selected the higher mode and aren't getting it, the cable or adapter is the likely limit; if you haven't tried it, selecting it may retrain the link to a higher rate." = "Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). If you've selected the higher mode and aren't getting it, the cable or adapter is the likely limit; if you haven't tried it, selecting it may retrain the link to a higher rate.";
-"Display Diagnostics" = "Display Diagnostics";
-"What your monitor can do, and what the link is carrying." = "What your monitor can do, and what the link is carrying.";
-"No Displays" = "No Displays";
-"Connect a monitor over USB-C or Thunderbolt to see what the link is delivering." = "Connect a monitor over USB-C or Thunderbolt to see what the link is delivering.";
+"A display is connected but its capabilities aren't readable, so there's nothing to compare the link against." = "Ekran jest podłączony, ale jego możliwości są nieczytelne, więc nie ma z czym porównać łącza.";
+"The link is carrying about %@ (%lld of %lld lanes)." = "Łącze przesyła około %@ (%lld z %lld torów).";
+"display" = "ekran";
+"Your %@ is connected, but the link rate isn't readable, so there's nothing to compare its capability against." = "Twój/a %@ jest podłączony/a, ale prędkość łącza jest nieczytelna, więc nie ma z czym porównać jego możliwości.";
+"Display running at full quality" = "Ekran pracuje z pełną jakością";
+"Your %@ is connected and the link has the bandwidth for its top mode. Nothing is holding the picture back." = "Twój/a %@ jest podłączony/a i łącze ma przepustowość dla jego najwyższego trybu. Nic nie ogranicza obrazu.";
+"%lld of %lld lanes at %@" = "%lld z %lld torów przy %@";
+"%lld of %lld lanes" = "%lld z %lld torów";
+"up to %lldHz" = "do %lld Hz";
+"a higher mode than the link is carrying" = "wyższy tryb niż ten, który przenosi łącze";
+"This estimate assumes standard colour; a display using compression (DSC) may reach more." = "Szacunek zakłada standardowe kolory; ekran używający kompresji (DSC) może osiągnąć więcej.";
+"Video is going through a %@ adapter" = "Obraz przechodzi przez adapter %@";
+"Your %@ is reached through a USB-C to %@ adapter, and the link isn't currently carrying the monitor's top mode (%@, about %@); it's carrying about %@ (%@). With an adapter in the chain, the adapter's own limit may be the cap rather than the cable. Trying the monitor over native DisplayPort, or a higher-spec adapter, would tell you which." = "Twój/a %@ jest podłączony/a przez adapter USB-C do %@, a łącze nie przesyła aktualnie najwyższego trybu monitora (%@, około %@); przesyła około %@ (%@). Z adapterem w łańcuchu to jego własne ograniczenie, a nie kabla, może wyznaczać górną granicę. Wypróbowanie monitora przez natywny DisplayPort lub adapter wyższej klasy pozwoli to ustalić.";
+"Monitor can do more than the link is carrying" = "Monitor może więcej, niż przesyła łącze";
+"Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). If you've selected the higher mode and aren't getting it, the cable or adapter is the likely limit; if you haven't tried it, selecting it may retrain the link to a higher rate." = "Twój/a %@ obsługuje tryb %@, który wymaga około %@, ale łącze przesyła aktualnie około %@ (%@). Jeśli wybrałeś/wybrałaś wyższy tryb, a go nie otrzymujesz, prawdopodobnym ograniczeniem jest kabel lub adapter; jeśli jeszcze tego nie próbowałeś/próbowałaś, wybranie go może przestroić łącze na wyższy poziom.";
+"Display Diagnostics" = "Diagnostyka ekranu";
+"What your monitor can do, and what the link is carrying." = "Co Twój monitor może zapewnić i co przesyła łącze.";
+"No Displays" = "Brak ekranów";
+"Connect a monitor over USB-C or Thunderbolt to see what the link is delivering." = "Podłącz monitor przez USB-C lub Thunderbolt, aby zobaczyć, co dostarcza łącze.";
 "%@ port %lld" = "%@ port %lld";
-"Display" = "Display";
+"Display" = "Ekran";
 "%lld × %lld" = "%lld × %lld";
-"native %lldHz" = "native %lldHz";
-"Top mode needs" = "Top mode needs";
-"Link carries" = "Link carries";
-"Rate" = "Rate";
-"See whether the link is carrying your monitor's full resolution and refresh." = "See whether the link is carrying your monitor's full resolution and refresh.";
-"Display links have their own screen: Display Diagnostics." = "Display links have their own screen: Display Diagnostics.";
+"native %lldHz" = "natywny %lld Hz";
+"Top mode needs" = "Najwyższy tryb wymaga";
+"Link carries" = "Łącze przesyła";
+"Rate" = "Prędkość";
+"See whether the link is carrying your monitor's full resolution and refresh." = "Sprawdź, czy łącze przesyła pełną rozdzielczość i odświeżanie Twojego monitora.";
+"Display links have their own screen: Display Diagnostics." = "Łącza ekranów mają własny widok: Diagnostyka ekranu.";
 
 /* Display dimension: cable attribution. English; community-refined. */
-"Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). The video is tunneled over Thunderbolt or USB4, so the cable carries far more than the display needs: this is unlikely to be the cable. It's most likely the resolution or refresh rate selected in Display settings, or this Mac's limit for this display." = "Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). The video is tunneled over Thunderbolt or USB4, so the cable carries far more than the display needs: this is unlikely to be the cable. It's most likely the resolution or refresh rate selected in Display settings, or this Mac's limit for this display.";
-"Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). The cable is already carrying every DisplayPort lane this Mac provides, so this is unlikely to be the cable. It's most likely the resolution or refresh rate selected in Display settings." = "Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). The cable is already carrying every DisplayPort lane this Mac provides, so this is unlikely to be the cable. It's most likely the resolution or refresh rate selected in Display settings.";
+"Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). The video is tunneled over Thunderbolt or USB4, so the cable carries far more than the display needs: this is unlikely to be the cable. It's most likely the resolution or refresh rate selected in Display settings, or this Mac's limit for this display." = "Twój/a %@ obsługuje tryb %@, który wymaga około %@, ale łącze przesyła aktualnie około %@ (%@). Obraz jest tunelowany przez Thunderbolt lub USB4, więc kabel przesyła znacznie więcej niż potrzebuje ekran: prawdopodobnie to nie kabel jest problemem. Najpewniej chodzi o rozdzielczość lub częstotliwość odświeżania wybraną w ustawieniach ekranu, albo o ograniczenie tego Maca dla tego ekranu.";
+"Your %@ can run %@, which needs about %@, but the link is currently carrying about %@ (%@). The cable is already carrying every DisplayPort lane this Mac provides, so this is unlikely to be the cable. It's most likely the resolution or refresh rate selected in Display settings." = "Twój/a %@ obsługuje tryb %@, który wymaga około %@, ale łącze przesyła aktualnie około %@ (%@). Kabel przesyła już wszystkie tory DisplayPort udostępniane przez tego Maca, więc prawdopodobnie to nie kabel jest problemem. Najpewniej chodzi o rozdzielczość lub częstotliwość odświeżania wybraną w ustawieniach ekranu.";
 
 /* Display dimension: branch device. English; community-refined. */
-"Your %@ is reached through a USB-C to %@ adapter that reports as %@, currently carrying about %@ (%@), short of the monitor's top mode (%@, about %@). With an adapter in the chain, the adapter's own limit may be the cap rather than the cable. A native DisplayPort connection, or a higher-spec adapter, would tell you which." = "Your %@ is reached through a USB-C to %@ adapter that reports as %@, currently carrying about %@ (%@), short of the monitor's top mode (%@, about %@). With an adapter in the chain, the adapter's own limit may be the cap rather than the cable. A native DisplayPort connection, or a higher-spec adapter, would tell you which.";
+"Your %@ is reached through a USB-C to %@ adapter that reports as %@, currently carrying about %@ (%@), short of the monitor's top mode (%@, about %@). With an adapter in the chain, the adapter's own limit may be the cap rather than the cable. A native DisplayPort connection, or a higher-spec adapter, would tell you which." = "Twój/a %@ jest podłączony/a przez adapter USB-C do %@, który raportuje się jako %@, przesyłając aktualnie około %@ (%@), poniżej najwyższego trybu monitora (%@, około %@). Z adapterem w łańcuchu to jego własne ograniczenie, a nie kabla, może wyznaczać górną granicę. Natywne połączenie DisplayPort lub adapter wyższej klasy pozwoli to ustalić.";
 
 /* Billboard device (display dimension). English; community-refined. */
-"Billboard device present" = "Billboard device present";
-"A Billboard device is present on this port. That usually appears when an Alt Mode like DisplayPort was set up but didn't fully come up. Your display is below its best mode, so a re-plug, a different cable, or a different adapter may bring it up. Some docks show a Billboard device normally, so this isn't always a fault." = "A Billboard device is present on this port. That usually appears when an Alt Mode like DisplayPort was set up but didn't fully come up. Your display is below its best mode, so a re-plug, a different cable, or a different adapter may bring it up. Some docks show a Billboard device normally, so this isn't always a fault.";
+"Billboard device present" = "Urządzenie Billboard obecne";
+"A Billboard device is present on this port. That usually appears when an Alt Mode like DisplayPort was set up but didn't fully come up. Your display is below its best mode, so a re-plug, a different cable, or a different adapter may bring it up. Some docks show a Billboard device normally, so this isn't always a fault." = "Na tym porcie jest obecne urządzenie Billboard. Pojawia się to zwykle, gdy tryb alternatywny, np. DisplayPort, został zainicjowany, ale nie ustanowił się w pełni. Twój ekran działa poniżej najlepszego trybu; ponowne podłączenie, inny kabel lub inny adapter może to naprawić. Niektóre stacje dokujące normalnie wyświetlają urządzenie Billboard, więc nie zawsze jest to błąd.";
 
 /* Display dimension: compression at the link ceiling (issue #246). */
 "Display may be using compression to reach its top mode" = "Wyświetlacz może używać kompresji, aby osiągnąć swój najlepszy tryb";

@@ -89,13 +89,13 @@
 "Your machine's hardware UUID is hashed with SHA-256 before sending. No names, accounts, serial numbers, or personal data are collected or stored." = "Sprzętowy UUID Twojej maszyny jest haszowany algorytmem SHA-256 przed wysłaniem. Żadne nazwy, konta, numery seryjne ani dane osobowe nie są zbierane ani przechowywane.";
 
 /* Negotiation diagnostics + Pro UX (PR #55). English; non-English to be refined by the community translation flow. */
-"Back" = "Back";
-"Unpin (popover closes when you click away)" = "Unpin (popover closes when you click away)";
-"Open in a separate window" = "Open in a separate window";
-"Power Monitor" = "Power Monitor";
-"Negotiation Diagnostics" = "Negotiation Diagnostics";
-"Cable Diagnostics" = "Cable Diagnostics";
-"%@ Port %lld Diagnostics" = "%@ Port %lld Diagnostics";
+"Back" = "Wstecz";
+"Unpin (popover closes when you click away)" = "Odepnij (okno zamknie się po kliknięciu w inne miejsce)";
+"Open in a separate window" = "Otwórz w osobnym oknie";
+"Power Monitor" = "Monitor zasilania";
+"Negotiation Diagnostics" = "Diagnostyka negocjacji";
+"Cable Diagnostics" = "Diagnostyka kabla";
+"%@ Port %lld Diagnostics" = "Diagnostyka %@ port %lld";
 
 /* Onboarding / welcome screen (first launch). */
 "Welcome to WhatCable" = "Witaj w WhatCable";
@@ -110,7 +110,7 @@
 "You can change this any time in Settings." = "Możesz to zmienić w dowolnym momencie w Ustawieniach.";
 
 /* Billboard device (display dimension). English; community-refined. */
-"Billboard device present" = "Billboard device present";
+"Billboard device present" = "Urządzenie Billboard obecne";
 
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Uwaga o kablu";

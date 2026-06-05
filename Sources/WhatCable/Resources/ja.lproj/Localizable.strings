@@ -90,13 +90,13 @@
 "Your machine's hardware UUID is hashed with SHA-256 before sending. No names, accounts, serial numbers, or personal data are collected or stored." = "お使いのマシンのハードウェアUUIDは送信前にSHA-256でハッシュ化されます。氏名、アカウント、シリアル番号、個人データは収集も保存もされません。";
 
 /* Negotiation diagnostics + Pro UX (PR #55). English; non-English to be refined by the community translation flow. */
-"Back" = "Back";
-"Unpin (popover closes when you click away)" = "Unpin (popover closes when you click away)";
-"Open in a separate window" = "Open in a separate window";
-"Power Monitor" = "Power Monitor";
-"Negotiation Diagnostics" = "Negotiation Diagnostics";
-"Cable Diagnostics" = "Cable Diagnostics";
-"%@ Port %lld Diagnostics" = "%@ Port %lld Diagnostics";
+"Back" = "戻る";
+"Unpin (popover closes when you click away)" = "ピン留め解除（他の場所をクリックすると閉じます）";
+"Open in a separate window" = "別のウインドウで開く";
+"Power Monitor" = "電力モニター";
+"Negotiation Diagnostics" = "ネゴシエーション診断";
+"Cable Diagnostics" = "ケーブル診断";
+"%@ Port %lld Diagnostics" = "%@ ポート %lld の診断";
 
 /* Onboarding / welcome screen (first launch). */
 "Welcome to WhatCable" = "WhatCableへようこそ";
@@ -111,7 +111,7 @@
 "You can change this any time in Settings." = "設定からいつでも変更できます。";
 
 /* Billboard device (display dimension). English; community-refined. */
-"Billboard device present" = "Billboard device present";
+"Billboard device present" = "Billboard デバイスが存在します";
 
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "ケーブルに関する注記";

@@ -100,7 +100,7 @@
 "USB 2.0 only (480 Mbps), no high-speed data" = "僅 USB 2.0（480 Mbps），沒有高速資料傳輸";
 "USB 3.2 Gen 1 (5 Gbps)" = "USB 3.2 Gen 1（5 Gbps）";
 "USB 3.2 Gen 2 (10 Gbps)" = "USB 3.2 Gen 2（10 Gbps）";
-"USB Hub" = "USB Hub";
+"USB Hub" = "USB 集線器";
 "USB Peripheral" = "USB 周邊裝置";
 "USB default" = "USB 預設";
 "USB device" = "USB 裝置";
@@ -142,7 +142,7 @@
 "Connected device: %@" = "已連接裝置：%@";
 "Connected device: %@, %@ (%@)" = "已連接裝置：%1$@，%2$@（%3$@）";
 "Data" = "資料";
-"DisplayPort Alt Mode" = "DisplayPort Alt Mode";
+"DisplayPort Alt Mode" = "DisplayPort 替代模式";
 
 /* Pro plugin UI strings */
 "%@ (spec, not measured)" = "%@（規格值，非實測）";
@@ -158,7 +158,7 @@
 "Alert" = "警示";
 "Attach count" = "連接次數";
 "Buy a licence at whatcable.uk" = "在 whatcable.uk 購買授權";
-"CC Advertisement" = "CC Advertisement";
+"CC Advertisement" = "CC 廣播";
 "CC line voltage" = "CC 線電壓";
 "Cable Identity" = "線材識別資訊";
 "Cancel" = "取消";
@@ -253,7 +253,7 @@
 "Pro features unlocked." = "Pro 功能已解鎖。";
 "Pro features will be locked until you enter your key again." = "在再次輸入金鑰前，Pro 功能將保持鎖定。";
 "Pro required" = "需要 Pro";
-"Product ID" = "Product ID";
+"Product ID" = "產品 ID";
 "Product Type" = "產品類型";
 "Raw VDOs" = "原始 VDO";
 "Raw cable VDOs" = "原始線材 VDO";
@@ -263,7 +263,7 @@
 "Short detect count" = "短路偵測次數";
 "Signal Routing" = "訊號路由";
 "Sleep/wake" = "睡眠/喚醒";
-"Source PDOs" = "Source PDOs";
+"Source PDOs" = "電源 PDO";
 "Source capabilities received" = "已收到 Source Capabilities";
 "Source_Capabilities message received from the power source. Contains the PDO list (voltages and currents on offer)." = "已從電源收到 Source_Capabilities 訊息。包含 PDO 清單（可提供的電壓和電流）。";
 "State" = "狀態";
@@ -292,7 +292,7 @@
 "Unstructured VDM enumeration began (discovering vendor-specific capabilities)." = "非結構化 VDM 列舉已開始（正在探索廠商特定規格）。";
 "Unstructured VDM status changed (vendor-specific messaging like Alt Mode setup)." = "非結構化 VDM 狀態已變更（廠商特定訊息，例如 Alt Mode 設定）。";
 "VDO fail count" = "VDO 失敗次數";
-"Vendor ID" = "Vendor ID";
+"Vendor ID" = "廠商 ID";
 "Vendor-specific unstructured VDM state changed. Used by Apple for custom Alt Mode setup and Thunderbolt negotiation." = "廠商特定的非結構化 VDM 狀態已變更。Apple 會用於自訂 Alt Mode 設定和 Thunderbolt 協商。";
 "Voltage" = "電壓";
 "Voltage (V)" = "電壓 (V)";
