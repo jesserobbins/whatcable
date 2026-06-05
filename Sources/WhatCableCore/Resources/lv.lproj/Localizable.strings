@@ -446,3 +446,5 @@
 "Per-port metering isn't available on this Mac." = "Mērījumi katram portam šajā Mac nav pieejami.";
 "macOS can be slow to report per-port power, sometimes up to a minute." = "macOS reizēm lēni ziņo jaudu katram portam, dažkārt līdz pat minūtei.";
 "Display connected. No power is being sent out of this port. Incoming power shows in System Power Input below." = "Displejs pievienots. Caur šo portu jauda netiek izvadīta. Ienākošā jauda redzama zemāk sadaļā «Sistēmas strāvas ievade».";
+"Connected to %lld Thunderbolt devices: %@" = "Savienots ar %1$lld Thunderbolt ierīcēm: %2$@";
+"Thunderbolt fabric:" = "Thunderbolt tīkls:";

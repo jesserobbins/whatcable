@@ -145,6 +145,29 @@ public enum TextFormatter {
             out += "  " + ANSI.wrap(ANSI.gray, "\u{2022}") + " " + label + "\n"
         }
 
+        // Thunderbolt fabric tree: every downstream switch reachable from
+        // this port's host root, following all branches (issue #280). Mirrors
+        // the "Connected devices" USB tree below it: depth indent + ↳ prefix,
+        // each row showing the device name and the link by which it connects.
+        if let socketID = ThunderboltTopology.socketID(for: port),
+           let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: thunderboltSwitches) {
+            let fabric = ThunderboltTopology.flatten(
+                ThunderboltTopology.tree(from: root, in: thunderboltSwitches)
+            )
+            if !fabric.isEmpty {
+                out += "\n" + ANSI.wrap(ANSI.bold, String(localized: "Thunderbolt fabric:", bundle: _coreLocalizedBundle)) + "\n"
+                for node in fabric {
+                    let indent = String(repeating: "  ", count: node.depth + 1)
+                    let prefix = node.depth > 0 ? "\u{21B3}" : ANSI.wrap(ANSI.gray, "\u{2022}")
+                    let name = ThunderboltLabels.deviceName(for: node.sw)
+                    let link = ThunderboltTopology.connectionLanePort(node.sw)
+                        .flatMap { ThunderboltLabels.linkLabel(for: $0) }
+                    let suffix = link.map { " - \($0)" } ?? ""
+                    out += "\(indent)\(prefix) \(name)\(suffix)\n"
+                }
+            }
+        }
+
         if !usbDevices.isEmpty {
             let tree = USBDeviceNode.flatten(USBDeviceNode.buildTree(from: usbDevices))
             out += "\n" + ANSI.wrap(ANSI.bold, String(localized: "Connected devices:", bundle: _coreLocalizedBundle)) + "\n"

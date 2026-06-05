@@ -83,6 +83,96 @@ struct TextFormatterTests {
         )
     }
 
+    // MARK: - Thunderbolt fabric tree (issue #280)
+
+    private func tbFabricPort() -> USBCPort {
+        USBCPort(
+            id: 1,
+            serviceName: "Port-USB-C@1",
+            className: "AppleHPMInterfaceType10",
+            portDescription: "Port-USB-C@1",
+            portTypeDescription: "USB-C",
+            portNumber: 1,
+            connectionActive: true,
+            activeCable: nil,
+            opticalCable: nil,
+            usbActive: nil,
+            superSpeedActive: nil,
+            usbModeType: nil,
+            usbConnectString: nil,
+            transportsSupported: ["CC", "USB2", "USB3", "CIO", "DisplayPort"],
+            transportsActive: ["CIO"],
+            transportsProvisioned: ["CC"],
+            plugOrientation: nil,
+            plugEventCount: nil,
+            connectionCount: nil,
+            overcurrentCount: nil,
+            pinConfiguration: [:],
+            powerCurrentLimits: [],
+            firmwareVersion: nil,
+            bootFlagsHex: nil,
+            rawProperties: ["PortType": "2"]
+        )
+    }
+
+    private func fabricLanePort(_ portNumber: Int, socketID: String?) -> IOThunderboltPort {
+        IOThunderboltPort(
+            portNumber: portNumber,
+            socketID: socketID,
+            adapterType: .lane,
+            currentSpeed: .usb4Tb4,
+            currentWidth: LinkWidth(rawValue: 0x2),
+            targetWidth: nil,
+            rawTargetSpeed: nil,
+            linkBandwidthRaw: nil
+        )
+    }
+
+    private func fabricSwitch(uid: Int64, depth: Int, parent: Int64?, vendor: String, model: String, lane: Int, socketID: String?) -> IOThunderboltSwitch {
+        IOThunderboltSwitch(
+            id: uid,
+            className: "IOThunderboltSwitchType5",
+            vendorID: 1452,
+            vendorName: vendor,
+            modelName: model,
+            routerID: 0,
+            depth: depth,
+            routeString: 0,
+            upstreamPortNumber: 1,
+            maxPortNumber: 8,
+            supportedSpeed: SupportedSpeedMask(rawValue: 12),
+            ports: [fabricLanePort(lane, socketID: socketID)],
+            parentSwitchUID: parent
+        )
+    }
+
+    /// The CLI text output must render the whole Thunderbolt fabric tree,
+    /// including the second branch (OWC) that the old linear chain dropped.
+    @Test("CLI renders the full Thunderbolt fabric tree with every branch")
+    func cliRendersFullThunderboltFabricTree() {
+        let switches = [
+            fabricSwitch(uid: 100, depth: 0, parent: nil, vendor: "Apple Inc.", model: "iOS", lane: 1, socketID: "1"),
+            fabricSwitch(uid: 200, depth: 1, parent: 100, vendor: "CalDigit, Inc.", model: "Thunderbolt 4 Pro Dock", lane: 2, socketID: nil),
+            fabricSwitch(uid: 300, depth: 2, parent: 200, vendor: "LaCie", model: "1big Dock v2", lane: 2, socketID: nil),
+            fabricSwitch(uid: 400, depth: 3, parent: 300, vendor: "Apple Inc.", model: "Studio Display", lane: 2, socketID: nil),
+            fabricSwitch(uid: 500, depth: 2, parent: 200, vendor: "OWC", model: "Express 1M2", lane: 2, socketID: nil),
+        ]
+        let output = TextFormatter.render(
+            ports: [tbFabricPort()], sources: [], identities: [],
+            showRaw: false, thunderboltSwitches: switches
+        )
+
+        #expect(output.contains("Thunderbolt fabric:"), "fabric header missing; got:\n\(output)")
+        // Every device must be named, including the previously-dropped OWC.
+        for name in ["CalDigit, Inc. Thunderbolt 4 Pro Dock", "LaCie 1big Dock v2", "Apple Inc. Studio Display", "OWC Express 1M2"] {
+            #expect(output.contains(name), "missing \(name) in fabric tree; got:\n\(output)")
+        }
+        // The two branches indent to different depths under the dock: the
+        // Studio Display (depth 3) sits deeper than the OWC (depth 2).
+        #expect(output.contains("      ↳ Apple Inc. Studio Display"), "Studio Display indent wrong; got:\n\(output)")
+        #expect(output.contains("    ↳ OWC Express 1M2"), "OWC indent wrong; got:\n\(output)")
+    }
+
     // MARK: - Cable trust signals
 
     /// Build an SOP' identity for trust-signal tests. `cableVDO` is VDO[3].

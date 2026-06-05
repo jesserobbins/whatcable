@@ -124,6 +124,60 @@ public enum ThunderboltTopology {
         return chain
     }
 
+    /// Return the full downstream tree rooted at a host root, following
+    /// *every* branch. A dock with two Thunderbolt devices yields two child
+    /// subtrees. Depth 0 is the root's direct children (the first downstream
+    /// devices), matching how `chain`'s `dropFirst()` is consumed. Returns an
+    /// empty array when nothing is downstream.
+    ///
+    /// This is the branch-aware counterpart to `chain(from:in:)`, which only
+    /// follows the first child. Use this for rendering the whole fabric;
+    /// `chain` is still the right tool for "deepest single path" questions
+    /// like step-down detection.
+    public static func tree(
+        from root: IOThunderboltSwitch,
+        in switches: [IOThunderboltSwitch]
+    ) -> [IOThunderboltSwitchNode] {
+        var byParent: [Int64: [IOThunderboltSwitch]] = [:]
+        for sw in switches {
+            guard let parentUID = sw.parentSwitchUID else { continue }
+            byParent[parentUID, default: []].append(sw)
+        }
+
+        func build(_ sw: IOThunderboltSwitch, depth: Int) -> IOThunderboltSwitchNode {
+            let kids = (byParent[sw.id] ?? [])
+                .sorted { $0.id < $1.id }
+                .map { build($0, depth: depth + 1) }
+            return IOThunderboltSwitchNode(sw: sw, depth: depth, children: kids)
+        }
+
+        return (byParent[root.id] ?? [])
+            .sorted { $0.id < $1.id }
+            .map { build($0, depth: 0) }
+    }
+
+    /// Flatten a tree into depth-first order (parent, then its subtree),
+    /// preserving each node's `depth`. Mirrors `USBDeviceNode.flatten` so the
+    /// CLI and GUI render the Thunderbolt fabric the same way they render the
+    /// USB device tree.
+    public static func flatten(_ nodes: [IOThunderboltSwitchNode]) -> [IOThunderboltSwitchNode] {
+        var result: [IOThunderboltSwitchNode] = []
+        for node in nodes {
+            result.append(node)
+            result.append(contentsOf: flatten(node.children))
+        }
+        return result
+    }
+
+    /// The lane port whose link label best represents *how this switch is
+    /// connected* (its arriving / active link). For a leaf device this is its
+    /// only active lane; for an inline switch every active lane carries the
+    /// same per-lane speed, so the first one is representative. Returns nil if
+    /// no lane is active.
+    public static func connectionLanePort(_ sw: IOThunderboltSwitch) -> IOThunderboltPort? {
+        sw.ports.first { $0.adapterType.isLane && $0.hasActiveLink }
+    }
+
     /// Find the active downstream lane port on a switch (the one going
     /// toward the next-hop device, not the upstream link to the host).
     /// Useful for picking which port's link state describes the next leg.
@@ -136,5 +190,26 @@ public enum ThunderboltTopology {
             return candidates.first
         }
         return candidates.first { $0.portNumber != sw.upstreamPortNumber }
+    }
+}
+
+// MARK: - Fabric tree
+
+/// A node in the Thunderbolt fabric tree: one switch plus its depth from the
+/// host root and its downstream children. Mirrors `USBDeviceNode` so the CLI
+/// and GUI can render the fabric the same way they render the USB device tree.
+/// Built from the flat switch list by `ThunderboltTopology.tree(from:in:)`,
+/// which walks `parentSwitchUID`.
+public struct IOThunderboltSwitchNode: Identifiable {
+    public let sw: IOThunderboltSwitch
+    public let depth: Int
+    public let children: [IOThunderboltSwitchNode]
+
+    public var id: Int64 { sw.id }
+
+    public init(sw: IOThunderboltSwitch, depth: Int, children: [IOThunderboltSwitchNode]) {
+        self.sw = sw
+        self.depth = depth
+        self.children = children
     }
 }

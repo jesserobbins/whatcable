@@ -218,6 +218,128 @@ struct PortSummaryThunderboltTests {
         )
     }
 
+    // MARK: - Branching tree (issue #280)
+
+    /// tacks's topology (#280): a CalDigit TB4 Pro Dock with TWO Thunderbolt
+    /// devices hanging off it: a LaCie dock (which itself feeds a Studio
+    /// Display) and an OWC Express 1M2. The old first-child-only chain showed
+    /// just the LaCie branch and silently dropped the OWC. Build it once here.
+    private func branchingSwitches() -> [IOThunderboltSwitch] {
+        let host = sw(
+            uid: 100, depth: 0, parent: nil,
+            vendor: "Apple Inc.", model: "iOS",
+            ports: [lanePort(portNumber: 1, socketID: "1", speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        let caldigit = sw(
+            uid: 200, depth: 1, parent: 100, upstreamPort: 1,
+            vendor: "CalDigit, Inc.", model: "Thunderbolt 4 Pro Dock",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        let lacie = sw(
+            uid: 300, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "LaCie", model: "1big Dock v2",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        let studio = sw(
+            uid: 400, depth: 3, parent: 300, upstreamPort: 1,
+            vendor: "Apple Inc.", model: "Studio Display",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        // Second branch off the CalDigit dock. Higher uid than the LaCie so it
+        // sorts last; the bug was that it never appeared at all.
+        let owc = sw(
+            uid: 500, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "OWC", model: "Express 1M2",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        return [host, caldigit, lacie, studio, owc]
+    }
+
+    @Test("Branching chain names every Thunderbolt device, not just one branch")
+    func branchingChainNamesEveryDevice() {
+        let summary = PortSummary(
+            port: tbPort(socket: "1"),
+            thunderboltSwitches: branchingSwitches()
+        )
+
+        // The flat named list must contain all four devices, including the
+        // OWC that the linear chain used to drop.
+        #expect(
+            summary.bullets.contains(
+                "Connected to 4 Thunderbolt devices: CalDigit, Inc. Thunderbolt 4 Pro Dock, LaCie 1big Dock v2, Apple Inc. Studio Display, OWC Express 1M2"
+            ),
+            "branching device list missing or wrong; got: \(summary.bullets)"
+        )
+        // It must NOT fall back to the misleading single-path phrasing.
+        #expect(
+            summary.bullets.contains { $0.hasPrefix("Connected via") } == false,
+            "branching tree must not use the single-path 'Connected via N hops' bullet; got: \(summary.bullets)"
+        )
+    }
+
+    @Test("Tree walk returns all branches; chain returns only the first")
+    func treeWalkReturnsAllBranches() {
+        let switches = branchingSwitches()
+        let root = ThunderboltTopology.hostRoot(forSocketID: "1", in: switches)
+        #expect(root != nil)
+        guard let root else { return }
+
+        // chain follows first-child only: host + CalDigit + LaCie + Studio.
+        let chain = ThunderboltTopology.chain(from: root, in: switches)
+        #expect(chain.count == 4)
+        #expect(chain.contains { $0.id == 500 } == false, "chain should drop the OWC branch")
+
+        // tree follows every branch: CalDigit (d0) -> LaCie (d1) -> Studio (d2),
+        // plus OWC (d1). Flattened depth-first by uid order.
+        let flat = ThunderboltTopology.flatten(ThunderboltTopology.tree(from: root, in: switches))
+        #expect(flat.count == 4, "tree should reach all four downstream devices")
+        #expect(flat.map(\.sw.id) == [200, 300, 400, 500], "unexpected DFS order: \(flat.map(\.sw.id))")
+        #expect(flat.map(\.depth) == [0, 1, 2, 1], "unexpected depths: \(flat.map(\.depth))")
+    }
+
+    @Test("Branching tree does not emit a spurious step-down bullet")
+    func branchingTreeDoesNotEmitStepDown() {
+        // A dock with two leaf devices: a slower TB3 branch (lower uid, so the
+        // first-child chain follows it) and a faster USB4 branch. The old code
+        // compared the host link to the first-child path's last leg and would
+        // wrongly fire "Last leg drops..." next to the flat device list. With
+        // a real tree, "last leg" is arbitrary, so step-down must be skipped.
+        let host = sw(
+            uid: 100, depth: 0, parent: nil,
+            vendor: "Apple Inc.", model: "iOS",
+            ports: [lanePort(portNumber: 1, socketID: "1", speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        let dock = sw(
+            uid: 200, depth: 1, parent: 100, upstreamPort: 1,
+            vendor: "CalDigit, Inc.", model: "TS4",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        let slowLeaf = sw(
+            uid: 300, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "Old", model: "TB3 Disk",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .tb3, widthRaw: 0x1)]
+        )
+        let fastLeaf = sw(
+            uid: 400, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "New", model: "USB4 Disk",
+            ports: [lanePort(portNumber: 2, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+
+        let summary = PortSummary(
+            port: tbPort(socket: "1"),
+            thunderboltSwitches: [host, dock, slowLeaf, fastLeaf]
+        )
+
+        #expect(
+            summary.bullets.contains { $0.hasPrefix("Connected to 3 Thunderbolt devices:") },
+            "expected flat device list; got: \(summary.bullets)"
+        )
+        #expect(
+            summary.bullets.contains { $0.contains("Last leg drops") } == false,
+            "branching tree must not emit a step-down bullet; got: \(summary.bullets)"
+        )
+    }
+
     // MARK: - Fallback when no matching switch is found
 
     @Test("Falls back to generic label when no matching switch")

@@ -466,14 +466,18 @@ struct PortCard: View {
         )
     }
 
-    /// Switches in the chain from this port's host root to the deepest
-    /// connected device. Empty if the port doesn't map to any TB switch.
-    var thunderboltChain: [IOThunderboltSwitch] {
-        guard let socketID = ThunderboltTopology.socketID(for: port),
-              let root = ThunderboltTopology.hostRoot(forSocketID: socketID, in: thunderboltSwitches) else {
-            return []
-        }
-        return ThunderboltTopology.chain(from: root, in: thunderboltSwitches)
+    /// The host root switch for this port, if it maps to one.
+    var thunderboltRoot: IOThunderboltSwitch? {
+        guard let socketID = ThunderboltTopology.socketID(for: port) else { return nil }
+        return ThunderboltTopology.hostRoot(forSocketID: socketID, in: thunderboltSwitches)
+    }
+
+    /// The full downstream Thunderbolt fabric tree for this port, following
+    /// every branch (a dock with two TB devices yields two subtrees, issue
+    /// #280). Empty if the port doesn't map to any TB switch.
+    var thunderboltTree: [IOThunderboltSwitchNode] {
+        guard let root = thunderboltRoot else { return [] }
+        return ThunderboltTopology.tree(from: root, in: thunderboltSwitches)
     }
 
     private var cableEmarker: USBPDSOP? {
@@ -638,7 +642,8 @@ struct PortCard: View {
                 AdvancedPortDetails(
                     port: port,
                     cableEmarker: cableEmarker,
-                    thunderboltChain: thunderboltChain
+                    thunderboltRoot: thunderboltRoot,
+                    thunderboltTree: thunderboltTree
                 )
             }
         }
@@ -860,7 +865,8 @@ struct PowerSourceList: View {
 struct AdvancedPortDetails: View {
     let port: AppleHPMInterface
     let cableEmarker: USBPDSOP?
-    let thunderboltChain: [IOThunderboltSwitch]
+    let thunderboltRoot: IOThunderboltSwitch?
+    let thunderboltTree: [IOThunderboltSwitchNode]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -880,8 +886,8 @@ struct AdvancedPortDetails: View {
             if let v2 = cableEmarker?.activeCableVDO2 {
                 ActiveCableVDO2Section(vdo2: v2)
             }
-            if !thunderboltChain.isEmpty {
-                ThunderboltFabricSection(chain: thunderboltChain)
+            if let root = thunderboltRoot, !thunderboltTree.isEmpty {
+                ThunderboltFabricSection(root: root, nodes: thunderboltTree)
             }
             let rawCount = port.rawProperties.count
             DisclosureGroup(String(localized: "All raw IOKit properties (\(rawCount))", bundle: _appLocalizedBundle)) {
@@ -972,31 +978,45 @@ struct ActiveCableVDO2Section: View {
     }
 }
 
-/// Compact tree view of the Thunderbolt fabric for one port. Shows the
-/// host root, every downstream switch in the chain, and the active
-/// downstream lane port's link state for each hop. Hidden behind the
-/// existing "show technical details" toggle.
+/// Expandable tree view of the Thunderbolt fabric for one port. Shows the
+/// host root and every downstream switch, following all branches (a dock with
+/// two TB devices shows both, issue #280). Each row shows the device name and
+/// the link by which it connects. Hidden behind the existing "show technical
+/// details" toggle, and collapsible within it.
 struct ThunderboltFabricSection: View {
-    let chain: [IOThunderboltSwitch]
+    let root: IOThunderboltSwitch
+    let nodes: [IOThunderboltSwitchNode]
+    @State private var expanded = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        DisclosureGroup(isExpanded: $expanded) {
+            VStack(alignment: .leading, spacing: 4) {
+                row(
+                    depth: 0,
+                    arrow: "",
+                    name: String(localized: "Host (\(root.className))", bundle: _appLocalizedBundle),
+                    port: ThunderboltTopology.activeDownstreamLanePort(root)
+                )
+                ForEach(ThunderboltTopology.flatten(nodes), id: \.id) { node in
+                    row(
+                        depth: node.depth + 1,
+                        arrow: "↳ ",
+                        name: ThunderboltLabels.deviceName(for: node.sw),
+                        port: ThunderboltTopology.connectionLanePort(node.sw)
+                    )
+                }
+            }
+            .padding(.top, 2)
+        } label: {
             Text(String(localized: "Thunderbolt fabric", bundle: _appLocalizedBundle))
                 .scaledFont(.caption, weight: .bold).foregroundStyle(.secondary)
-            ForEach(Array(chain.enumerated()), id: \.element.id) { index, sw in
-                hopRow(sw, index: index)
-            }
         }
     }
 
     @ViewBuilder
-    private func hopRow(_ sw: IOThunderboltSwitch, index: Int) -> some View {
-        let indent = String(repeating: "  ", count: index)
-        let arrow = index == 0 ? "" : "↳ "
-        let name = sw.isHostRoot ? String(localized: "Host (\(sw.className))", bundle: _appLocalizedBundle) : ThunderboltLabels.deviceName(for: sw)
-        let port = ThunderboltTopology.activeDownstreamLanePort(sw)
+    private func row(depth: Int, arrow: String, name: String, port: IOThunderboltPort?) -> some View {
+        let indent = String(repeating: "  ", count: depth)
         let linkLabel = port.flatMap { ThunderboltLabels.linkLabel(for: $0) } ?? String(localized: "no active link", bundle: _appLocalizedBundle)
-
         HStack(alignment: .top) {
             Text(verbatim: "\(indent)\(arrow)\(name)")
                 .scaledFont(.caption, design: .monospaced)

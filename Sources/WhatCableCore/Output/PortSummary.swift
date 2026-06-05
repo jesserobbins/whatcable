@@ -589,9 +589,24 @@ private func thunderboltBullets(
     }
 
     // Connected-device line. Only meaningful when there's at least one
-    // downstream switch.
+    // downstream switch. On a linear daisy-chain we show the path
+    // (A → B). On a branching tree (a dock with two Thunderbolt devices)
+    // the first-child path would silently drop the other branches
+    // (issue #280), so instead we name every downstream device. The
+    // indented fabric tree below carries the branch structure on both the
+    // CLI and the GUI.
     let downstream = chain.dropFirst()
-    if !downstream.isEmpty {
+    let allDownstream = ThunderboltTopology.flatten(
+        ThunderboltTopology.tree(from: root, in: switches)
+    )
+    let isBranching = allDownstream.count > downstream.count
+    if isBranching {
+        // Branching: the linear chain is hiding devices. Name them all.
+        let names = allDownstream.map { ThunderboltLabels.deviceName(for: $0.sw) }
+        let count = names.count
+        let list = names.joined(separator: ", ")
+        bullets.append(String(localized: "Connected to \(count) Thunderbolt devices: \(list)", bundle: _coreLocalizedBundle))
+    } else if !downstream.isEmpty {
         let names = downstream.map { ThunderboltLabels.deviceName(for: $0) }
         let hops = downstream.count
         let path = names.joined(separator: " → ")
@@ -602,16 +617,19 @@ private func thunderboltBullets(
         }
     }
 
-    // Step-down detection: only meaningful on real daisy-chains
-    // (two or more downstream switches). On a single-hop link, the
-    // host's downstream port and the device's upstream port describe
-    // the SAME physical cable from opposite ends; the two readings can
-    // disagree on lane count (the controller-side view aggregates lanes
-    // that the device-side view doesn't), and that disagreement is not
-    // a real step-down. With two or more hops, comparing the first link
-    // (host -> device 1) to the last link (device N-1 -> device N)
-    // genuinely contrasts two distinct cables.
-    if downstream.count >= 2,
+    // Step-down detection: only meaningful on linear daisy-chains
+    // (two or more downstream switches). Skip when branching: the
+    // linear chain's "last" node is arbitrary in a tree, so a
+    // step-down reading would be meaningless or misleading.
+    // On a single-hop link, the host's downstream port and the device's
+    // upstream port describe the SAME physical cable from opposite ends;
+    // the two readings can disagree on lane count (the controller-side
+    // view aggregates lanes that the device-side view doesn't), and
+    // that disagreement is not a real step-down. With two or more hops,
+    // comparing the first link (host -> device 1) to the last link
+    // (device N-1 -> device N) genuinely contrasts two distinct cables.
+    if !isBranching,
+       downstream.count >= 2,
        let hostPort = ThunderboltTopology.activeDownstreamLanePort(root),
        let last = downstream.last,
        let lastLeg = ThunderboltTopology.activeDownstreamLanePort(last)
