@@ -342,8 +342,8 @@ struct CableReportTests {
     @Test("Markdown labels extra VDOs as Other")
     func markdownLabelsExtraVDOsAsOther() {
         // PD response can include up to 7 VDOs (ID Header + Cert Stat +
-        // Product + up to 4 Product Type VDOs). Anything past index 3 we
-        // label "Other" rather than guessing.
+        // Product + up to 4 Product Type VDOs). Index 4 is Active Cable VDO2;
+        // anything past that we label "Other" rather than guessing.
         let id = USBPDSOP(
             id: 1,
             endpoint: .sopPrime,
@@ -366,6 +366,28 @@ struct CableReportTests {
         let md = payload.markdown
         #expect(md.contains("`0xDEADBEEF`"))
         #expect(md.contains("`0xCAFEBABE`"))
+        // Index 4 is now "Active Cable VDO2"; index 5 falls through to "Other".
+        #expect(md.contains("Active Cable VDO2"))
         #expect(md.contains("Other"))
+    }
+
+    // MARK: - VDO role labels (spec Figure 6.5)
+
+    @Test("vdoRoleLabel returns correct labels for indices 0 to 4")
+    func vdoRoleLabelKnownIndices() {
+        // USB PD R3.2 Figure 6.5: 0=ID Header, 1=Cert Stat, 2=Product,
+        // 3=Cable (Passive Cable VDO or Active Cable VDO1), 4=Active Cable VDO2.
+        #expect(CableReport.vdoRoleLabel(at: 0) == "ID Header")
+        #expect(CableReport.vdoRoleLabel(at: 1) == "Cert Stat")
+        #expect(CableReport.vdoRoleLabel(at: 2) == "Product")
+        #expect(CableReport.vdoRoleLabel(at: 3) == "Cable")
+        #expect(CableReport.vdoRoleLabel(at: 4) == "Active Cable VDO2")
+    }
+
+    @Test("vdoRoleLabel returns Other for indices 5 and above")
+    func vdoRoleLabelUnknownIndices() {
+        #expect(CableReport.vdoRoleLabel(at: 5) == "Other")
+        #expect(CableReport.vdoRoleLabel(at: 6) == "Other")
+        #expect(CableReport.vdoRoleLabel(at: 99) == "Other")
     }
 }

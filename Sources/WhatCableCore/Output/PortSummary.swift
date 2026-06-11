@@ -641,15 +641,46 @@ private func thunderboltBullets(
     return bullets
 }
 
-/// If the last-leg link is slower than the host link (per-lane Gbps drop
-/// or lane count drop), describe the change. Returns nil for symmetric
-/// chains where every leg matches.
+/// If the last-leg link is slower than the host link, describe the change.
+/// Returns nil when the labels match, or when the last leg is equal speed or
+/// faster than the host link.
+///
+/// "Slower" is defined as a strictly lower total throughput, where total
+/// throughput = per-lane Gb/s x lane count. For asymmetric links the dominant
+/// (larger) lane count is used. This definition ensures that equal per-lane
+/// speed across different lane counts (e.g. 20 Gb/s x 1 vs 20 Gb/s x 2) is
+/// NOT reported as a drop: the last leg may carry fewer lanes but the per-lane
+/// rate is unchanged, and the chain is still running at the same generation.
+///
+/// Example comparisons:
+///   - host 20 x 2 (40 Gbps) vs last-leg 10 x 1 (10 Gbps) → drop (10 < 40)
+///   - host 20 x 1 (20 Gbps) vs last-leg 20 x 2 (40 Gbps) → nil (40 >= 20)
+///   - host 20 x 1 (20 Gbps) vs last-leg 20 x 1 (20 Gbps) → nil (equal)
 private func stepDownLabel(host: IOThunderboltPort, lastLeg: IOThunderboltPort) -> String? {
     guard let hostLabel = ThunderboltLabels.linkLabel(for: host),
           let lastLabel = ThunderboltLabels.linkLabel(for: lastLeg) else {
         return nil
     }
+    // Fast path: identical labels are never a drop.
     if hostLabel == lastLabel { return nil }
+
+    // Compute total throughput (Gbps) for each leg.
+    // perLaneGbps is nil for unknown generations; treat those as not-comparable
+    // and return nil so we never show a misleading drop label.
+    guard let hostPerLane = host.currentSpeed?.perLaneGbps,
+          let lastPerLane = lastLeg.currentSpeed?.perLaneGbps,
+          let hostWidth = host.currentWidth,
+          let lastWidth = lastLeg.currentWidth else {
+        return nil
+    }
+    let hostLanes = max(hostWidth.txLanes, hostWidth.rxLanes, 1)
+    let lastLanes = max(lastWidth.txLanes, lastWidth.rxLanes, 1)
+    let hostTotal = hostPerLane * hostLanes
+    let lastTotal = lastPerLane * lastLanes
+
+    // Only emit the step-down message when the last leg is genuinely slower.
+    guard lastTotal < hostTotal else { return nil }
+
     let h = hostLabel.replacingOccurrences(of: "Up to", with: "up to")
     let l = lastLabel.replacingOccurrences(of: "Up to", with: "up to")
     return String(localized: "Last leg drops from \(h) to \(l)", bundle: _coreLocalizedBundle)

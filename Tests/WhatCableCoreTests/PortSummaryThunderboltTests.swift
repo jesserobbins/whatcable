@@ -182,6 +182,120 @@ struct PortSummaryThunderboltTests {
         )
     }
 
+    // MARK: - DAR-27: step-down label must compare total throughput, not label strings
+
+    /// 20 Gb/s x 1 vs 20 Gb/s x 2 are different label strings but the same
+    /// per-lane speed. The last leg here is wider (more lanes) than the host,
+    /// so total throughput is higher: this must NOT be reported as a drop.
+    @Test("Equal per-lane speed different lane count does not emit step-down")
+    func equalPerLaneSpeedDifferentLaneCountNoStepDown() {
+        // Host link: USB4, single-lane (20 Gb/s x 1, 20 Gbps total)
+        // Last leg:  USB4, dual-lane  (20 Gb/s x 2, 40 Gbps total)
+        let port = tbPort(socket: "1")
+        let host = sw(
+            uid: 100, depth: 0, parent: nil,
+            vendor: "Apple Inc.", model: "iOS",
+            ports: [lanePort(portNumber: 1, socketID: "1", speed: .usb4Tb4, widthRaw: 0x1)] // single-lane
+        )
+        let first = sw(
+            uid: 200, depth: 1, parent: 100, upstreamPort: 1,
+            vendor: "Dock Co.", model: "Middle Dock",
+            ports: [
+                lanePort(portNumber: 1, socketID: nil, speed: .usb4Tb4, widthRaw: 0x1),
+                lanePort(portNumber: 4, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2) // downstream: dual-lane
+            ]
+        )
+        let leaf = sw(
+            uid: 300, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "Leaf Co.", model: "USB4 SSD",
+            ports: [lanePort(portNumber: 1, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+
+        let summary = PortSummary(
+            port: port,
+            thunderboltSwitches: [host, first, leaf]
+        )
+
+        #expect(
+            summary.bullets.contains { $0.contains("Last leg drops") } == false,
+            "equal per-lane speed, wider last leg must not emit step-down; got: \(summary.bullets)"
+        )
+    }
+
+    /// The last leg is genuinely slower: TB3 single-lane (10 Gbps) vs USB4
+    /// dual-lane host (40 Gbps). This IS a real drop and must be reported.
+    @Test("Genuinely slower last leg emits step-down")
+    func genuinelySlowerLastLegEmitsStepDown() {
+        // Host: USB4 dual-lane (20 x 2 = 40 Gbps total)
+        // Last leg: TB3 single-lane (10 x 1 = 10 Gbps total)
+        let port = tbPort(socket: "1")
+        let host = sw(
+            uid: 100, depth: 0, parent: nil,
+            vendor: "Apple Inc.", model: "iOS",
+            ports: [lanePort(portNumber: 1, socketID: "1", speed: .usb4Tb4, widthRaw: 0x2)]
+        )
+        let middle = sw(
+            uid: 200, depth: 1, parent: 100, upstreamPort: 1,
+            vendor: "Dock Co.", model: "USB4 Dock",
+            ports: [
+                lanePort(portNumber: 1, socketID: nil, speed: .usb4Tb4, widthRaw: 0x2),
+                lanePort(portNumber: 4, socketID: nil, speed: .tb3, widthRaw: 0x1) // downstream: TB3 single
+            ]
+        )
+        let leaf = sw(
+            uid: 300, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "Old Co.", model: "TB3 Drive",
+            ports: [lanePort(portNumber: 1, socketID: nil, speed: .tb3, widthRaw: 0x1)]
+        )
+
+        let summary = PortSummary(
+            port: port,
+            thunderboltSwitches: [host, middle, leaf]
+        )
+
+        #expect(
+            summary.bullets.contains { $0.contains("Last leg drops from up to 20 Gb/s × 2 to up to 10 Gb/s × 1") },
+            "genuinely slower last leg must emit step-down; got: \(summary.bullets)"
+        )
+    }
+
+    /// Last leg is faster than the host link (e.g. host TB3, last leg TB5).
+    /// "Faster last leg" is a weird configuration but must never produce a drop.
+    @Test("Faster last leg does not emit step-down")
+    func fasterLastLegDoesNotEmitStepDown() {
+        // Host: TB3 single-lane (10 x 1 = 10 Gbps)
+        // Last leg: TB5 dual-lane (40 x 2 = 80 Gbps)
+        let port = tbPort(socket: "1")
+        let host = sw(
+            uid: 100, depth: 0, parent: nil,
+            vendor: "Apple Inc.", model: "iOS",
+            ports: [lanePort(portNumber: 1, socketID: "1", speed: .tb3, widthRaw: 0x1)]
+        )
+        let middle = sw(
+            uid: 200, depth: 1, parent: 100, upstreamPort: 1,
+            vendor: "Dock Co.", model: "Dock",
+            ports: [
+                lanePort(portNumber: 1, socketID: nil, speed: .tb3, widthRaw: 0x1),
+                lanePort(portNumber: 4, socketID: nil, speed: .tb5, widthRaw: 0x2)
+            ]
+        )
+        let leaf = sw(
+            uid: 300, depth: 2, parent: 200, upstreamPort: 1,
+            vendor: "Fast Co.", model: "TB5 SSD",
+            ports: [lanePort(portNumber: 1, socketID: nil, speed: .tb5, widthRaw: 0x2)]
+        )
+
+        let summary = PortSummary(
+            port: port,
+            thunderboltSwitches: [host, middle, leaf]
+        )
+
+        #expect(
+            summary.bullets.contains { $0.contains("Last leg drops") } == false,
+            "faster last leg must not emit step-down; got: \(summary.bullets)"
+        )
+    }
+
     // MARK: - Single-hop must NOT trigger step-down
 
     /// Regression: in Steve's TB3 sample, the host port reports

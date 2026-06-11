@@ -142,6 +142,7 @@ public enum CableReport {
         case 1: return "Cert Stat"
         case 2: return "Product"
         case 3: return "Cable"
+        case 4: return "Active Cable VDO2"
         default: return "Other"
         }
     }
