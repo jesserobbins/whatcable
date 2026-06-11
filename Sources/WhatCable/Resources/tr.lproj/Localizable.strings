@@ -123,3 +123,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Kablo notu";
 "Cable details" = "Kablo ayrıntıları";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Aktif kablo (VDO 2)";
+"Physical connection" = "Fiziksel bağlantı";
+"Active element" = "Aktif eleman";
+"Optically isolated" = "Optik olarak yalıtılmış";
+"USB lanes" = "USB şeritleri";
+"Two" = "İki";
+"One" = "Bir";
+"USB Gen" = "USB nesli";
+"Gen 2 or higher" = "Nesil 2 veya üzeri";
+"Gen 1" = "Nesil 1";
+"USB4 supported" = "USB4 desteklenir";
+"USB 3.2 supported" = "USB 3.2 desteklenir";
+"USB 2.0 supported" = "USB 2.0 desteklenir";
+"USB 2.0 hub hops" = "USB 2.0 hub atlamaları";
+"USB4 asymmetric" = "USB4 asimetrik";
+"U3 to U0 transition" = "U3'ten U0'a geçiş";
+"Through U3S" = "U3S üzerinden";
+"Direct" = "Doğrudan";
+"Idle power (U3/CLd)" = "Boşta güç tüketimi (U3/CLd)";
+"Max operating temp" = "Maks. çalışma sıcaklığı";
+"Shutdown temp" = "Kapanma sıcaklığı";

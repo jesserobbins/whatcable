@@ -113,11 +113,14 @@ public enum ThunderboltTopology {
 
         var chain: [IOThunderboltSwitch] = [root]
         var current = root
+        var seen: Set<Int64> = [root.id]
         // Follow first-child only. Daisy-chains are linear in the common
         // case; if the user has a true tree (dock with two TB devices),
         // the chain follows the first downstream branch and the GUI tree
         // can render the full topology separately.
         while let children = byParent[current.id], let next = children.first {
+            guard !seen.contains(next.id) else { break }
+            seen.insert(next.id)
             chain.append(next)
             current = next
         }

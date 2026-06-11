@@ -26,10 +26,12 @@ struct CableTimelineProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: CableWidgetIntent, in context: Context) async -> Timeline<CableWidgetEntry> {
         let entry = currentEntry(for: configuration)
-        return Timeline(
-            entries: [entry],
-            policy: .after(Date().addingTimeInterval(60))
-        )
+        // When the app isn't running there is no snapshot data. Return .never
+        // so the extension sleeps until WidgetDataWriter pushes a reload.
+        let policy: TimelineReloadPolicy = entry.snapshot != nil
+            ? .after(Date().addingTimeInterval(60))
+            : .never
+        return Timeline(entries: [entry], policy: policy)
     }
 
     // MARK: - Read from App Group

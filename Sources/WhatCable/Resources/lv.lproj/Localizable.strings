@@ -123,3 +123,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Piezīme par kabeli";
 "Cable details" = "Kabeļa informācija";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Aktīvais kabelis (VDO 2)";
+"Physical connection" = "Fiziskais savienojums";
+"Active element" = "Aktīvais elements";
+"Optically isolated" = "Optiski izolēts";
+"USB lanes" = "USB joslas";
+"Two" = "Divi";
+"One" = "Viens";
+"USB Gen" = "USB paaudze";
+"Gen 2 or higher" = "2. paaudze vai jaunāka";
+"Gen 1" = "1. paaudze";
+"USB4 supported" = "USB4 atbalstīts";
+"USB 3.2 supported" = "USB 3.2 atbalstīts";
+"USB 2.0 supported" = "USB 2.0 atbalstīts";
+"USB 2.0 hub hops" = "USB 2.0 centrmezgla lēcieni";
+"USB4 asymmetric" = "USB4 asimetrisks";
+"U3 to U0 transition" = "U3 uz U0 pāreja";
+"Through U3S" = "Caur U3S";
+"Direct" = "Tiešs";
+"Idle power (U3/CLd)" = "Dīkstāves jauda (U3/CLd)";
+"Max operating temp" = "Maks. darba temp.";
+"Shutdown temp" = "Izslēgšanas temp.";

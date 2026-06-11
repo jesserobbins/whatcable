@@ -123,3 +123,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "케이블 참고";
 "Cable details" = "케이블 세부 정보";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "액티브 케이블 (VDO 2)";
+"Physical connection" = "물리적 연결";
+"Active element" = "액티브 소자";
+"Optically isolated" = "광학적 절연";
+"USB lanes" = "USB 레인";
+"Two" = "두 개";
+"One" = "한 개";
+"USB Gen" = "USB 세대";
+"Gen 2 or higher" = "Gen 2 이상";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4 지원";
+"USB 3.2 supported" = "USB 3.2 지원";
+"USB 2.0 supported" = "USB 2.0 지원";
+"USB 2.0 hub hops" = "USB 2.0 허브 홉";
+"USB4 asymmetric" = "USB4 비대칭";
+"U3 to U0 transition" = "U3에서 U0 전환";
+"Through U3S" = "U3S 경유";
+"Direct" = "직접";
+"Idle power (U3/CLd)" = "유휴 전력 (U3/CLd)";
+"Max operating temp" = "최대 동작 온도";
+"Shutdown temp" = "종료 온도";

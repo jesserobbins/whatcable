@@ -35,6 +35,7 @@ final class UpdateChecker: ObservableObject {
     private init() {}
 
     func start() {
+        guard timer == nil else { return }
         check(silent: true)
         timer = Timer.scheduledTimer(withTimeInterval: Self.pollInterval, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.check(silent: true) }

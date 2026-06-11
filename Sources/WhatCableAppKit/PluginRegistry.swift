@@ -69,6 +69,9 @@ public final class PluginRegistry {
     public typealias ProScreenBuilder = (PortCardContext?) -> AnyView
     public private(set) var proScreenBuilders: [String: ProScreenBuilder] = [:]
     public func register(proScreen id: String, builder: @escaping ProScreenBuilder) {
+        if proScreenBuilders[id] != nil {
+            assertionFailure("PluginRegistry: pro screen '\(id)' is already registered")
+        }
         proScreenBuilders[id] = builder
     }
     public func proScreen(id: String, portCard: PortCardContext?) -> AnyView? {

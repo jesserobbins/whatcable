@@ -124,3 +124,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "ケーブルに関する注記";
 "Cable details" = "ケーブルの詳細";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "アクティブケーブル (VDO 2)";
+"Physical connection" = "物理接続";
+"Active element" = "アクティブ素子";
+"Optically isolated" = "光学的絶縁";
+"USB lanes" = "USBレーン";
+"Two" = "2本";
+"One" = "1本";
+"USB Gen" = "USB世代";
+"Gen 2 or higher" = "Gen 2以上";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4対応";
+"USB 3.2 supported" = "USB 3.2対応";
+"USB 2.0 supported" = "USB 2.0対応";
+"USB 2.0 hub hops" = "USB 2.0ハブホップ数";
+"USB4 asymmetric" = "USB4非対称";
+"U3 to U0 transition" = "U3からU0への遷移";
+"Through U3S" = "U3S経由";
+"Direct" = "直接";
+"Idle power (U3/CLd)" = "アイドル電力 (U3/CLd)";
+"Max operating temp" = "最大動作温度";
+"Shutdown temp" = "シャットダウン温度";

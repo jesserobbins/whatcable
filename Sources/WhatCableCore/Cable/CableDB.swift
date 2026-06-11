@@ -101,15 +101,18 @@ private struct Store {
         }
 
         var db: OpaquePointer?
+        defer { sqlite3_close(db) } // sqlite3_close(nil) is a documented no-op
         guard sqlite3_open_v2(
             url.path, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, nil
         ) == SQLITE_OK else {
             return Store(vendors: [:], cables: [:])
         }
-        defer { sqlite3_close(db) }
+        guard let db else {
+            return Store(vendors: [:], cables: [:])
+        }
 
-        let vendors = loadVendors(db: db!)
-        let cables = loadCables(db: db!)
+        let vendors = loadVendors(db: db)
+        let cables = loadCables(db: db)
 
         return Store(vendors: vendors, cables: cables)
     }

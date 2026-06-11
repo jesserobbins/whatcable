@@ -123,3 +123,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Kabelnotitie";
 "Cable details" = "Kabeldetails";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Actieve kabel (VDO 2)";
+"Physical connection" = "Fysieke verbinding";
+"Active element" = "Actief element";
+"Optically isolated" = "Optisch geïsoleerd";
+"USB lanes" = "USB-banen";
+"Two" = "Twee";
+"One" = "Één";
+"USB Gen" = "USB-generatie";
+"Gen 2 or higher" = "Gen 2 of hoger";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4 ondersteund";
+"USB 3.2 supported" = "USB 3.2 ondersteund";
+"USB 2.0 supported" = "USB 2.0 ondersteund";
+"USB 2.0 hub hops" = "USB 2.0 hub-hops";
+"USB4 asymmetric" = "USB4 asymmetrisch";
+"U3 to U0 transition" = "U3 naar U0 overgang";
+"Through U3S" = "Via U3S";
+"Direct" = "Direct";
+"Idle power (U3/CLd)" = "Ruststroom (U3/CLd)";
+"Max operating temp" = "Max. bedrijfstemperatuur";
+"Shutdown temp" = "Afsluitstemperatuur";

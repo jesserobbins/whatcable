@@ -124,3 +124,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Մալուխի նշում";
 "Cable details" = "Մալուխի մանրամասներ";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Ակտիվ մալուխ (VDO 2)";
+"Physical connection" = "Ֆիզիկական կապ";
+"Active element" = "Ակտիվ տարր";
+"Optically isolated" = "Օպտիկական մեկուսացված";
+"USB lanes" = "USB ալիքներ";
+"Two" = "Երկու";
+"One" = "Մեկ";
+"USB Gen" = "USB սերնդ";
+"Gen 2 or higher" = "Սերնդ 2 կամ ավելի";
+"Gen 1" = "Սերնդ 1";
+"USB4 supported" = "USB4 աջակցվում է";
+"USB 3.2 supported" = "USB 3.2 աջակցվում է";
+"USB 2.0 supported" = "USB 2.0 աջակցվում է";
+"USB 2.0 hub hops" = "USB 2.0 հանգույցի ցատկումներ";
+"USB4 asymmetric" = "USB4 ասիմետրիկ";
+"U3 to U0 transition" = "U3-ից U0 անցում";
+"Through U3S" = "U3S-ի միջով";
+"Direct" = "Ուղիղ";
+"Idle power (U3/CLd)" = "Հանգստի հոսանք (U3/CLd)";
+"Max operating temp" = "Առավելագույն աշխ. ջերմ.";
+"Shutdown temp" = "Անջատման ջերմ.";

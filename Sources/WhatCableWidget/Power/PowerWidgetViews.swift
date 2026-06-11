@@ -25,16 +25,16 @@ struct PowerMonitorEntryView: View {
     let entry: PowerMonitorEntry
 
     var body: some View {
-        if let snapshot = entry.snapshot, snapshot.powerState != nil {
+        if let snapshot = entry.snapshot, let power = snapshot.powerState {
             switch family {
             case .systemSmall:
-                PowerSmallView(snapshot: snapshot)
+                PowerSmallView(snapshot: snapshot, power: power)
             case .systemMedium:
-                PowerMediumView(snapshot: snapshot)
+                PowerMediumView(snapshot: snapshot, power: power)
             case .systemLarge:
-                PowerLargeView(snapshot: snapshot)
+                PowerLargeView(snapshot: snapshot, power: power)
             default:
-                PowerMediumView(snapshot: snapshot)
+                PowerMediumView(snapshot: snapshot, power: power)
             }
         } else {
             PowerEmptyStateView()
@@ -101,8 +101,7 @@ private func wattText(_ w: Double) -> String {
 
 struct PowerSmallView: View {
     let snapshot: WidgetSnapshot
-
-    private var power: WidgetSnapshot.PowerState { snapshot.powerState! }
+    let power: WidgetSnapshot.PowerState
 
     var body: some View {
         VStack(alignment: .leading, spacing: WidgetMetrics.s) {
@@ -142,8 +141,7 @@ struct PowerSmallView: View {
 
 struct PowerMediumView: View {
     let snapshot: WidgetSnapshot
-
-    private var power: WidgetSnapshot.PowerState { snapshot.powerState! }
+    let power: WidgetSnapshot.PowerState
 
     var body: some View {
         VStack(alignment: .leading, spacing: WidgetMetrics.s) {
@@ -202,8 +200,7 @@ struct PowerMediumView: View {
 
 struct PowerLargeView: View {
     let snapshot: WidgetSnapshot
-
-    private var power: WidgetSnapshot.PowerState { snapshot.powerState! }
+    let power: WidgetSnapshot.PowerState
 
     /// Per-port rows that fit below the battery / charger / draw rows before
     /// the large widget runs out of height. Extra ports collapse into "+N".

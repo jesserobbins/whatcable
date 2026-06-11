@@ -151,4 +151,20 @@ struct EDIDInfoTests {
         let short = Array(Self.g34wBaseBlock.prefix(64))
         #expect(EDIDInfo(Data(short)) == nil)
     }
+
+    @Test("Monitor name stops at first non-ASCII byte, not garbled Latin-1")
+    func monitorNameIgnoresHighBytes() throws {
+        // Inject a Latin-1 byte (0xE9 = 'e with accent') into the 0xFC monitor
+        // name descriptor of the G34w base block. The 0xFC block starts at
+        // offset 108; the name payload is at offsets 113-125. Byte 113 is the
+        // first name character ('L'). Replacing it with 0xE9 should cause the
+        // decoder to stop immediately, yielding nil (no printable chars before
+        // the bad byte).
+        var bytes = Self.g34wBaseBlock
+        // 0xFC descriptor starts at offset 108; name bytes start at 108+5 = 113.
+        bytes[113] = 0xE9
+        let edid = try #require(EDIDInfo(Data(bytes)))
+        // The name is truncated to nothing before the bad byte, so it should be nil.
+        #expect(edid.monitorName == nil)
+    }
 }

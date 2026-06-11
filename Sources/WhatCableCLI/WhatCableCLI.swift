@@ -6,6 +6,7 @@ import WhatCablePlugins
 
 @main
 struct WhatCableCLI {
+    @MainActor
     static func main() async {
         bootstrapPlugins(registry: .shared)
 
@@ -43,7 +44,7 @@ struct WhatCableCLI {
         for cmd in PluginRegistry.shared.cliCommands {
             knownFlags.formUnion(cmd.flagNames)
         }
-        for arg in args where arg.hasPrefix("-") && !knownFlags.contains(arg) {
+        for arg in args where arg.hasPrefix("-") && arg != "--" && !knownFlags.contains(arg) {
             FileHandle.standardError.write(Data("whatcable: unknown option \(arg)\n".utf8))
             FileHandle.standardError.write(Data(helpText.utf8))
             exit(2)
@@ -116,7 +117,7 @@ struct WhatCableCLI {
           --report       Print a cable report (markdown + GitHub URL) and exit
           --desktop      Open WhatCable as a Dock app with a window
           --popover      Open WhatCable in the menu bar (popover mode)
-          --tb-debug     Dump the IOIOThunderboltSwitch tree (for contributors helping
+          --tb-debug     Dump the IOThunderboltSwitch tree (for contributors helping
                          us design the Thunderbolt fabric feature). See issue tracker.
           --version      Print version and exit
           -h, --help     Show this help and exit
@@ -149,6 +150,8 @@ private func printSnapshot(_ snapshot: CableSnapshot, asJSON: Bool, showRaw: Boo
         )
         print(json)
     } else {
+        // trmTransports intentionally omitted: text mode does not render TRM data yet.
+        // Wire it in here when TextFormatter gains TRM rendering.
         let output = TextFormatter.render(
             ports: snapshot.ports,
             sources: snapshot.powerSources,
@@ -176,15 +179,24 @@ private func runWatch(provider: any CableSnapshotProvider, asJSON: Bool, showRaw
     // Default SIGINT / SIGTERM kill the process abruptly. Take them over so
     // the watch task can cancel cleanly, the provider's onTermination tears
     // down its internal task, and stdout flushes before exit.
+    // Track which signal fired so we can exit with the POSIX convention
+    // 128+signal (130 for SIGINT, 143 for SIGTERM).
+    var caughtSignal: Int32 = 0
     signal(SIGINT, SIG_IGN)
     signal(SIGTERM, SIG_IGN)
 
     let intSrc = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
-    intSrc.setEventHandler { watchTask.cancel() }
+    intSrc.setEventHandler {
+        caughtSignal = SIGINT
+        watchTask.cancel()
+    }
     intSrc.resume()
 
     let termSrc = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
-    termSrc.setEventHandler { watchTask.cancel() }
+    termSrc.setEventHandler {
+        caughtSignal = SIGTERM
+        watchTask.cancel()
+    }
     termSrc.resume()
 
     await watchTask.value
@@ -192,6 +204,10 @@ private func runWatch(provider: any CableSnapshotProvider, asJSON: Bool, showRaw
     intSrc.cancel()
     termSrc.cancel()
     fflush(stdout)
+
+    if caughtSignal != 0 {
+        exit(128 + caughtSignal)
+    }
 }
 
 private func consumeWatchStream(provider: any CableSnapshotProvider, asJSON: Bool, showRaw: Bool) async {
@@ -224,6 +240,8 @@ private func consumeWatchStream(provider: any CableSnapshotProvider, asJSON: Boo
                     continue
                 }
             } else {
+                // trmTransports intentionally omitted: text mode does not render TRM data yet.
+                // Wire it in here when TextFormatter gains TRM rendering.
                 output = TextFormatter.render(
                     ports: snapshot.ports,
                     sources: snapshot.powerSources,
@@ -259,14 +277,19 @@ private func consumeWatchStream(provider: any CableSnapshotProvider, asJSON: Boo
         return
     } catch {
         FileHandle.standardError.write(Data("whatcable: \(error)\n".utf8))
+        fflush(stdout)
         exit(1)
     }
 }
 
+private let watchTimestampFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    return f
+}()
+
 private func timestampHeader() -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-    return "whatcable --watch · \(formatter.string(from: Date()))\n\n"
+    return "whatcable --watch · \(watchTimestampFormatter.string(from: Date()))\n\n"
 }
 
 private func launchApp(menuBarMode: Bool) {
@@ -274,7 +297,6 @@ private func launchApp(menuBarMode: Bool) {
     if let defaults = UserDefaults(suiteName: suiteName) {
         defaults.set(menuBarMode, forKey: "useMenuBarMode")
         defaults.set(true, forKey: "hasCompletedOnboarding")
-        defaults.synchronize()
     }
 
     // If running from inside the .app bundle (Contents/Helpers/whatcable),

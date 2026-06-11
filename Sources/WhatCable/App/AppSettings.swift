@@ -177,7 +177,7 @@ final class AppSettings: ObservableObject {
         } catch {
             Self.log.error("Failed to update launch at login: \(error.localizedDescription, privacy: .public)")
             // Roll the published value back so the UI matches reality.
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 let actual = SMAppService.mainApp.status == .enabled
                 if self.launchAtLogin != actual {

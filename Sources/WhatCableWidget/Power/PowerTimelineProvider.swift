@@ -25,11 +25,12 @@ struct PowerTimelineProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PowerMonitorEntry>) -> Void) {
         let entry = currentEntry()
-        let timeline = Timeline(
-            entries: [entry],
-            policy: .after(Date().addingTimeInterval(60))
-        )
-        completion(timeline)
+        // When the app isn't running there is no snapshot data. Return .never
+        // so the extension sleeps until WidgetDataWriter pushes a reload.
+        let policy: TimelineReloadPolicy = entry.snapshot != nil
+            ? .after(Date().addingTimeInterval(60))
+            : .never
+        completion(Timeline(entries: [entry], policy: policy))
     }
 
     private func currentEntry() -> PowerMonitorEntry {

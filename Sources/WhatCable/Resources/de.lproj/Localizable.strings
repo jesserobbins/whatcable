@@ -124,3 +124,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Kabelhinweis";
 "Cable details" = "Kabeldetails";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Aktives Kabel (VDO 2)";
+"Physical connection" = "Physische Verbindung";
+"Active element" = "Aktives Element";
+"Optically isolated" = "Optisch isoliert";
+"USB lanes" = "USB-Lanes";
+"Two" = "Zwei";
+"One" = "Eins";
+"USB Gen" = "USB-Gen";
+"Gen 2 or higher" = "Gen 2 oder höher";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4 unterstützt";
+"USB 3.2 supported" = "USB 3.2 unterstützt";
+"USB 2.0 supported" = "USB 2.0 unterstützt";
+"USB 2.0 hub hops" = "USB 2.0 Hub-Hops";
+"USB4 asymmetric" = "USB4 asymmetrisch";
+"U3 to U0 transition" = "U3 zu U0 Übergang";
+"Through U3S" = "Über U3S";
+"Direct" = "Direkt";
+"Idle power (U3/CLd)" = "Ruhestrom (U3/CLd)";
+"Max operating temp" = "Max. Betriebstemperatur";
+"Shutdown temp" = "Abschalttemperatur";

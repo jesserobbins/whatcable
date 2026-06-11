@@ -124,3 +124,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "线缆备注";
 "Cable details" = "线缆详情";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "有源线缆 (VDO 2)";
+"Physical connection" = "物理连接";
+"Active element" = "有源元件";
+"Optically isolated" = "光学隔离";
+"USB lanes" = "USB 通道";
+"Two" = "两条";
+"One" = "一条";
+"USB Gen" = "USB 代";
+"Gen 2 or higher" = "第 2 代或更高";
+"Gen 1" = "第 1 代";
+"USB4 supported" = "支持 USB4";
+"USB 3.2 supported" = "支持 USB 3.2";
+"USB 2.0 supported" = "支持 USB 2.0";
+"USB 2.0 hub hops" = "USB 2.0 集线器跳数";
+"USB4 asymmetric" = "USB4 非对称";
+"U3 to U0 transition" = "U3 到 U0 切换";
+"Through U3S" = "经由 U3S";
+"Direct" = "直接";
+"Idle power (U3/CLd)" = "空闲功耗 (U3/CLd)";
+"Max operating temp" = "最高工作温度";
+"Shutdown temp" = "关断温度";

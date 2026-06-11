@@ -102,7 +102,7 @@ public enum CableReport {
             sysctlbyname("hw.model", nil, &size, nil, 0)
             guard size > 0 else { return "unknown" }
             var buf = [CChar](repeating: 0, count: size)
-            sysctlbyname("hw.model", &buf, &size, nil, 0)
+            guard sysctlbyname("hw.model", &buf, &size, nil, 0) == 0 else { return "unknown" }
             return String(cString: buf)
         }
 

@@ -124,3 +124,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Kabelmerknad";
 "Cable details" = "Kabeldetaljer";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Aktivt kabel (VDO 2)";
+"Physical connection" = "Fysisk tilkobling";
+"Active element" = "Aktivt element";
+"Optically isolated" = "Optisk isolert";
+"USB lanes" = "USB-baner";
+"Two" = "To";
+"One" = "En";
+"USB Gen" = "USB-generasjon";
+"Gen 2 or higher" = "Gen 2 eller høyere";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4 støttes";
+"USB 3.2 supported" = "USB 3.2 støttes";
+"USB 2.0 supported" = "USB 2.0 støttes";
+"USB 2.0 hub hops" = "USB 2.0 hub-hopp";
+"USB4 asymmetric" = "USB4 asymmetrisk";
+"U3 to U0 transition" = "U3 til U0 overgang";
+"Through U3S" = "Via U3S";
+"Direct" = "Direkte";
+"Idle power (U3/CLd)" = "Hvilstrøm (U3/CLd)";
+"Max operating temp" = "Maks driftstemperatur";
+"Shutdown temp" = "Avslutningstemperat.";

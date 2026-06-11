@@ -123,3 +123,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "केबल नोट";
 "Cable details" = "केबल विवरण";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "सक्रिय केबल (VDO 2)";
+"Physical connection" = "भौतिक कनेक्शन";
+"Active element" = "सक्रिय तत्व";
+"Optically isolated" = "प्रकाशीय रूप से पृथक";
+"USB lanes" = "USB लेन";
+"Two" = "दो";
+"One" = "एक";
+"USB Gen" = "USB जनरेशन";
+"Gen 2 or higher" = "Gen 2 या उससे अधिक";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4 समर्थित";
+"USB 3.2 supported" = "USB 3.2 समर्थित";
+"USB 2.0 supported" = "USB 2.0 समर्थित";
+"USB 2.0 hub hops" = "USB 2.0 हब हॉप्स";
+"USB4 asymmetric" = "USB4 असममित";
+"U3 to U0 transition" = "U3 से U0 में संक्रमण";
+"Through U3S" = "U3S के माध्यम से";
+"Direct" = "प्रत्यक्ष";
+"Idle power (U3/CLd)" = "निष्क्रिय शक्ति (U3/CLd)";
+"Max operating temp" = "अधिकतम परिचालन तापमान";
+"Shutdown temp" = "शटडाउन तापमान";

@@ -123,3 +123,26 @@
 /* Softened blank e-marker note (DAR-140) */
 "Cable note" = "Примітка про кабель";
 "Cable details" = "Деталі кабелю";
+
+/* Active Cable VDO 2 section (ActiveCableVDO2Section) */
+"Active cable (VDO 2)" = "Активний кабель (VDO 2)";
+"Physical connection" = "Фізичне підключення";
+"Active element" = "Активний елемент";
+"Optically isolated" = "Оптично ізольований";
+"USB lanes" = "Смуги USB";
+"Two" = "Два";
+"One" = "Один";
+"USB Gen" = "Покоління USB";
+"Gen 2 or higher" = "Gen 2 або вище";
+"Gen 1" = "Gen 1";
+"USB4 supported" = "USB4 підтримується";
+"USB 3.2 supported" = "USB 3.2 підтримується";
+"USB 2.0 supported" = "USB 2.0 підтримується";
+"USB 2.0 hub hops" = "Переходи через USB 2.0 хаб";
+"USB4 asymmetric" = "USB4 асиметричний";
+"U3 to U0 transition" = "Перехід з U3 до U0";
+"Through U3S" = "Через U3S";
+"Direct" = "Прямий";
+"Idle power (U3/CLd)" = "Споживання в стані спокою (U3/CLd)";
+"Max operating temp" = "Макс. робоча температура";
+"Shutdown temp" = "Температура вимкнення";

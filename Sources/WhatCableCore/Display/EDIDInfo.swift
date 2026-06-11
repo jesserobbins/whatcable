@@ -197,10 +197,13 @@ public struct EDIDInfo: Hashable, Sendable {
 
     /// Decode a 13-byte EDID text payload (monitor name / serial). The string
     /// is ASCII, terminated by a line feed (0x0A) and padded with spaces.
+    /// Only printable ASCII bytes (0x20-0x7E) are accepted; anything outside
+    /// that range (including 0x0A terminator and Latin-1 high bytes) ends the
+    /// scan so misbehaving monitors can't produce garbled output.
     private static func decodeDescriptorString(_ raw: [UInt8]) -> String? {
         var out = ""
         for b in raw {
-            if b == 0x0A { break }
+            guard b >= 0x20, b <= 0x7E else { break }
             out.append(Character(UnicodeScalar(b)))
         }
         let trimmed = out.trimmingCharacters(in: .whitespaces)
