@@ -79,12 +79,25 @@ public final class LiquidDetectionWatcher: ObservableObject {
     }
 
     public func refresh() {
-        statuses.removeAll()
+        // Build the new list locally and assign once. Mutating the published
+        // `statuses` in place (removeAll then re-append) emits a transient empty
+        // value that downstream subscribers see as "no ports," causing brief UI
+        // flicker on every poll tick. See issue #227.
+        var rebuilt: [LiquidDetectionUpdate] = []
         var iter: io_iterator_t = 0
         if IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("AppleHPMLDCMType2"), &iter) == KERN_SUCCESS {
-            handleAdded(iter)
+            while case let service = IOIteratorNext(iter), service != 0 {
+                if let update = makeUpdate(from: service) {
+                    rebuilt.removeAll {
+                        $0.portIndex == update.portIndex && $0.portType == update.portType
+                    }
+                    rebuilt.append(update)
+                }
+                IOObjectRelease(service)
+            }
             IOObjectRelease(iter)
         }
+        if rebuilt != statuses { statuses = rebuilt }
     }
 
     private func handleAdded(_ iterator: io_iterator_t) {
