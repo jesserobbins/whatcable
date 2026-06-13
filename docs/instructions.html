@@ -362,10 +362,12 @@
 }
 </script>
 <style>
+  /* Match the home and pro page width */
+  main .wrap { width: min(1120px, calc(100% - 40px)); }
   /* Grouped table of contents */
   .toc-groups {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 16px;
     margin: 0 0 8px;
     padding: 0;
@@ -373,9 +375,9 @@
   }
   .toc-group {
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--panel);
-    padding: 16px 18px;
+    padding: 18px 20px;
   }
   .toc-group-title {
     display: block;
@@ -405,11 +407,10 @@
     display: flex;
     align-items: baseline;
     gap: 14px;
-    margin: 64px 0 4px;
-    padding-top: 26px;
-    border-top: 2px solid var(--line);
+    margin: 64px 0 12px;
+    padding-top: 10px;
   }
-  .doc-part:first-of-type { margin-top: 40px; }
+  .doc-part:first-of-type { margin-top: 48px; }
   .doc-part-num {
     font-size: 13px;
     font-weight: 700;
@@ -423,31 +424,45 @@
     letter-spacing: 0.08em;
     color: var(--ink-soft);
   }
-  main .wrap h2[id] { scroll-margin-top: 80px; margin-top: 40px; }
-  main .wrap h3[id] { scroll-margin-top: 80px; }
-  /* Pro feature group labels */
+  /* Section cards, same language as the home and pro pages */
+  .doc-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin: 18px 0;
+    scroll-margin-top: 80px;
+  }
+  .doc-card > :first-child { margin-top: 0; }
+  .doc-card > :last-child { margin-bottom: 0; }
+  .doc-card h2[id], .doc-card h3[id] { scroll-margin-top: 80px; }
+  /* Keep prose at a comfortable reading measure inside the wide cards */
+  .doc-card > p,
+  .doc-card > ul,
+  .doc-card > ol,
+  .doc-card .docs-faq { max-width: 760px; }
+  .doc-card figure { max-width: 640px; margin: 20px 0; }
+  /* Pro feature group headings */
   .pro-group-label {
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--accent);
-    margin: 36px 0 4px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--line);
+    margin: 0 0 8px;
     scroll-margin-top: 80px;
   }
   .install-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    margin: 0 0 16px;
+    margin: 0 0 4px;
   }
   .install-card {
     padding: 18px 20px;
     border-radius: 10px;
     border: 1px solid var(--line);
-    background: var(--panel);
+    background: var(--bg);
     display: flex;
     flex-direction: column;
   }
@@ -485,10 +500,12 @@
     font-family: inherit;
   }
   .install-card .button:hover { background: var(--accent-strong); }
-  .docs-faq { margin-bottom: 24px; }
+  .docs-faq { margin-bottom: 22px; }
+  .docs-faq:last-child { margin-bottom: 0; }
   .docs-faq h3 { margin-bottom: 6px; }
   @media (max-width: 600px) {
     .install-grid { grid-template-columns: 1fr; }
+    .doc-card { padding: 24px 22px; }
   }
 </style>
 
@@ -565,6 +582,7 @@
 
 <div class="doc-part"><span class="doc-part-num">01</span><span class="doc-part-label">Getting started</span></div>
 
+<section class="doc-card">
 <h2 id="install">Install</h2>
 <p>
   WhatCable is signed and verified by Apple, so your Mac won't show any security warnings. You need macOS 14 (Sonoma) or later on a Mac with Apple Silicon (any M1, M2, M3, M4, or M5 chip).
@@ -594,7 +612,9 @@
 <div class="note">
   <strong>Why isn't this on the Mac App Store?</strong> The App Store's security sandbox blocks the low-level hardware access WhatCable needs to read cable data. It's still signed and verified by Apple, just distributed outside the store.
 </div>
+</section>
 
+<section class="doc-card">
 <h2 id="getting-started">Getting started</h2>
 <p>
   Open WhatCable from your Applications folder. A small icon appears in your menu bar (the row of icons at the top-right of your screen, near the clock and Wi-Fi).
@@ -610,7 +630,9 @@
 <p>
   That's it. No setup, no account, no configuration. Everything updates in real time as you plug and unplug things.
 </p>
+</section>
 
+<section class="doc-card">
 <h2 id="what-it-shows">What it shows</h2>
 <p>
   Each port card has a <strong>headline</strong> at the top. This is the quick answer to "what's plugged in here and is it working well?" Here's what each headline means:
@@ -643,9 +665,11 @@
   <img src="/screenshot.webp?v=0.18.0" alt="WhatCable popover showing USB-C port diagnostics: a monitor reached through a USB-C to HDMI adapter with the adapter flagged as the bottleneck, and a 100W charger with the battery full" width="480">
   <figcaption>The main panel. One card per port, showing what's connected and how well it's working.</figcaption>
 </figure>
+</section>
 
 <div class="doc-part"><span class="doc-part-num">02</span><span class="doc-part-label">Everyday use</span></div>
 
+<section class="doc-card">
 <h2 id="common-questions">Common questions</h2>
 
 <div class="docs-faq">
@@ -701,7 +725,9 @@
     This is normal for most everyday USB-C cables. Only higher-rated cables (Thunderbolt, USB4, or cables rated for 100W+) are required to have the chip that reports detailed info. Your cable still works fine, there's just nothing extra to report.
   </p>
 </div>
+</section>
 
+<section class="doc-card">
 <h2 id="charging">Charging diagnostics</h2>
 <p>
   When a charger is connected, WhatCable figures out what's limiting your charge speed and shows it clearly:
@@ -715,7 +741,9 @@
 <p>
   Below the charging line, you'll see the charger's power levels: every wattage the charger can supply (e.g. 5V, 9V, 15V, 20V), with the active one highlighted. This is useful for confirming whether a charger actually supports what it says on the box.
 </p>
+</section>
 
+<section class="doc-card">
 <h2 id="trust">Cable trust signals</h2>
 <p>
   WhatCable checks a cable's reported data against the official USB specification. When something looks unusual, an orange banner appears with the details. This is not proof that a cable is fake or dangerous. It means something in the reported data doesn't match expectations.
@@ -729,7 +757,9 @@
 <p>
   If a cable triggers a warning, it might still work perfectly well. Some budget cables use generic chips with placeholder data. The warning is there so you can make an informed decision, not to alarm you.
 </p>
+</section>
 
+<section class="doc-card">
 <h2 id="notifications">Notifications</h2>
 <p>
   WhatCable can send a notification whenever something is plugged in or unplugged. This is off by default. Turn it on in Settings.
@@ -737,7 +767,9 @@
 <p>
   When you enable it, macOS will ask for permission. Notifications are silent (no sound) and show the device name and speed for connections. They work even when the panel is closed.
 </p>
+</section>
 
+<section class="doc-card">
 <h2 id="settings">Settings</h2>
 <p>
   Click the gear icon in the top corner of the panel to open Settings.
@@ -771,7 +803,9 @@
 <ul>
   <li>Shows a link to upgrade if you don't have Pro yet. With Pro activated, this section has toggles for Pro-specific features.</li>
 </ul>
+</section>
 
+<section class="doc-card">
 <h2 id="menu">Right-click menu</h2>
 <p>
   Right-click (or Control-click) the menu bar icon for quick actions:
@@ -788,14 +822,18 @@
   <li><strong>About</strong> and <strong>WhatCable on GitHub:</strong> links to the project.</li>
   <li><strong>Quit:</strong> close the app.</li>
 </ul>
+</section>
 
 <div class="doc-part"><span class="doc-part-num">03</span><span class="doc-part-label">WhatCable Pro</span></div>
 
+<section class="doc-card">
 <h2 id="pro">Pro features</h2>
 <p>
   <a href="/pro">WhatCable Pro</a> is a one-time purchase that adds deeper diagnostics on top of everything in the free app. All free features stay free forever. Pro adds the following:
 </p>
+</section>
 
+<section class="doc-card">
 <p class="pro-group-label" id="pro-diagnostics">Diagnostics</p>
 
 <h3>Negotiation Diagnostics <span class="pro-badge">Pro</span></h3>
@@ -827,7 +865,9 @@
   <img src="/screenshot-dp-altmode.webp" alt="Pro diagnostics screen for a USB-C port driving a display, showing the device identity and a pin diagram with the DP four-lane routing" loading="lazy">
   <figcaption>Display details: device identity, pin diagram with lane routing, and port health on one screen.</figcaption>
 </figure>
+</section>
 
+<section class="doc-card">
 <p class="pro-group-label" id="pro-power">Power &amp; charging</p>
 
 <h3>Live power metering <span class="pro-badge">Pro</span></h3>
@@ -859,7 +899,9 @@
 <p>
   Estimates the electrical resistance of your cable in milliohms using real power samples. Useful for spotting worn or marginal cables before they cause problems.
 </p>
+</section>
 
+<section class="doc-card">
 <p class="pro-group-label" id="pro-health">Cable &amp; port health</p>
 
 <h3>Port health counters <span class="pro-badge">Pro</span></h3>
@@ -886,7 +928,9 @@
 <p>
   The full data that the cable's chip reported, beyond the summary the free app shows. For developers and hardware engineers who need the exact fields.
 </p>
+</section>
 
+<section class="doc-card">
 <p class="pro-group-label" id="pro-terminal">In the terminal and on the desktop</p>
 
 <h3>CLI monitor mode <span class="pro-badge">Pro</span></h3>
@@ -926,6 +970,7 @@
 <p>
   The desktop widget shows a live power chart alongside cable status. Glance at your desktop and see charging trends without opening anything.
 </p>
+</section>
 
 <div class="note">
   <strong>Activate Pro:</strong> right-click the WhatCable icon in the menu bar and click <strong>Licence</strong>. Paste your key and click Activate. Works on up to 2 Macs. See the <a href="/pro">Pro page</a> for pricing.
@@ -933,6 +978,7 @@
 
 <div class="doc-part"><span class="doc-part-num">04</span><span class="doc-part-label">Help &amp; advanced</span></div>
 
+<section class="doc-card">
 <h2 id="troubleshooting">Troubleshooting</h2>
 
 <h3>My cable shows as "Basic cable"</h3>
@@ -1007,7 +1053,9 @@
   <li>Quit and relaunch WhatCable.</li>
   <li>Add the widget again from the widget gallery.</li>
 </ol>
+</section>
 
+<section class="doc-card">
 <h2 id="engineer">Engineer mode</h2>
 <p>
   For developers, IT staff, or anyone who wants the raw data: hold <code>Option</code> and click the menu bar icon to show the underlying hardware properties for each port. This includes register values, protocol fields, and the full USB device tree.
@@ -1020,7 +1068,9 @@
   <img src="/screenshot-engineer.webp" alt="WhatCable popover with technical details mode on, showing raw hardware properties below the port card" loading="lazy" width="480">
   <figcaption>Technical details mode shows the raw hardware data underneath each port card.</figcaption>
 </figure>
+</section>
 
+<section class="doc-card">
 <h2 id="contribute">Contribute data</h2>
 <p>
   You can optionally submit anonymous hardware data to help WhatCable support more Mac models and cable types. Nothing is collected in the background. A submission only happens when you choose to start one and approve it.
@@ -1046,7 +1096,9 @@
   <li>No analytics or background tracking. The only network request WhatCable makes on its own is a six-hourly update check.</li>
   <li>Running it again from the same Mac replaces your previous submission rather than adding to it.</li>
 </ul>
+</section>
 
+<section class="doc-card">
 <h2 id="good-to-know">Good to know</h2>
 <ul>
   <li>WhatCable checks for updates once every six hours. No analytics, no tracking. See the <a href="/privacy">privacy policy</a>.</li>
@@ -1054,6 +1106,7 @@
   <li>The <a href="/cables">cable database</a> is built from community-reported cables. If yours isn't listed, use "Report this cable" in the app to contribute.</li>
   <li>WhatCable includes a <a href="/cli">command-line tool</a> for developers. It ships inside the app and is on your PATH automatically if you installed via Homebrew.</li>
 </ul>
+</section>
 
 
 <script>
