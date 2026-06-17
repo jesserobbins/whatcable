@@ -19,18 +19,11 @@ public final class DisplayPortTransportWatcher: ObservableObject {
 
     @Published public private(set) var statuses: [DisplayPortUpdate] = []
 
-    public let updates: AsyncStream<DisplayPortUpdate>
-
-    private var continuation: AsyncStream<DisplayPortUpdate>.Continuation?
     private var notifyPort: IONotificationPortRef?
     private var addedIterator: io_iterator_t = 0
     private var removedIterator: io_iterator_t = 0
 
-    public init() {
-        var continuation: AsyncStream<DisplayPortUpdate>.Continuation?
-        updates = AsyncStream { continuation = $0 }
-        self.continuation = continuation
-    }
+    public init() {}
 
     public func start() {
         guard notifyPort == nil else { return }
@@ -85,21 +78,12 @@ public final class DisplayPortTransportWatcher: ObservableObject {
 
     public func refresh() {
         // Build locally and assign once so subscribers never see a transient
-        // empty list mid-refresh. The per-update continuation yield is kept so
-        // the `updates` stream contract is unchanged. See issue #227.
+        // empty list mid-refresh. See issue #227.
         var rebuilt: [DisplayPortUpdate] = []
         var iter: io_iterator_t = 0
         if IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("IOPortTransportStateDisplayPort"), &iter) == KERN_SUCCESS {
             while case let service = IOIteratorNext(iter), service != 0 {
                 if let update = makeUpdate(from: service) {
-                    // Only yield to the stream when the value changed; the
-                    // @Published assignment below is already change-guarded, but
-                    // without this check every 1-second poll would flood the
-                    // stream with duplicate values even when nothing moved.
-                    let existing = statuses.first { $0.entryID == update.entryID }
-                    if existing != update {
-                        continuation?.yield(update)
-                    }
                     rebuilt.removeAll { $0.entryID == update.entryID }
                     rebuilt.append(update)
                 }
@@ -117,7 +101,6 @@ public final class DisplayPortTransportWatcher: ObservableObject {
             if let update = makeUpdate(from: service) {
                 statuses.removeAll { $0.entryID == update.entryID }
                 statuses.append(update)
-                continuation?.yield(update)
                 changed = true
             }
             IOObjectRelease(service)
