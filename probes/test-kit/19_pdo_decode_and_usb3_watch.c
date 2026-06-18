@@ -13,9 +13,11 @@
 //     Bit 21     = Dual-Role Data
 //     Bit 20     = Unchunked Extended Messages Supported
 //   APDO (Augmented):
-//     Bits 29:28 = APDO type (00=SPR PPS, 01=EPR AVS)
+//     Bits 29:28 = APDO type (00=SPR PPS, 01=EPR AVS, 10=SPR AVS)
 //     SPR PPS: bits 24:17 = max voltage (100mV), bits 15:8 = min voltage (100mV), bits 6:0 = max current (50mA)
-//     EPR AVS: bits 25:17 = max voltage (100mV), bits 15:8 = min voltage (100mV), bits 6:0 = max current (50mA) + PDP
+//     EPR AVS: bits 25:17 = max voltage (100mV), bits 15:8 = min voltage (100mV), bits 7:0 = PDP (1W).
+//              There is no current field; the low byte is the PDP.
+//     SPR AVS: bits 19:10 = max current at 15V (10mA), bits 9:0 = max current at 20V (10mA)
 //
 // Also watches for USB3 transport state with notifications.
 //
@@ -86,12 +88,15 @@ static void decodePDO(uint32_t pdo, int index) {
                 uint32_t minV = ((pdo >> 8) & 0xFF) * 100;
                 uint32_t maxI = (pdo & 0x7F) * 50;
                 printf("SPR PPS %d-%dmV max %dmA\n", minV, maxV, maxI);
-            } else if (apdoType == 1) { // EPR AVS
-                uint32_t maxV = ((pdo >> 17) & 0x1FF) * 100;
-                uint32_t minV = ((pdo >> 8) & 0xFF) * 100;
-                uint32_t maxI = (pdo & 0x7F) * 50;
-                uint32_t pdp = ((pdo >> 26) & 0x3) + 1; // PDP field
-                printf("EPR AVS %d-%dmV max %dmA PDP=%d\n", minV, maxV, maxI, pdp * 100);
+            } else if (apdoType == 1) { // EPR AVS (Table 6.16)
+                uint32_t maxV = ((pdo >> 17) & 0x1FF) * 100; // bits 25:17, 100mV
+                uint32_t minV = ((pdo >> 8) & 0xFF) * 100;   // bits 15:8, 100mV
+                uint32_t pdp_w = pdo & 0xFF;                 // bits 7:0, PDP in 1W
+                printf("EPR AVS %d-%dmV PDP=%dW\n", minV, maxV, pdp_w);
+            } else if (apdoType == 2) { // SPR AVS (Table 6.15)
+                uint32_t maxI15V = ((pdo >> 10) & 0x3FF) * 10; // bits 19:10, 10mA
+                uint32_t maxI20V = (pdo & 0x3FF) * 10;         // bits 9:0, 10mA
+                printf("SPR AVS %dmA@15V %dmA@20V\n", maxI15V, maxI20V);
             } else {
                 printf("APDO type=%d (unknown)\n", apdoType);
             }
