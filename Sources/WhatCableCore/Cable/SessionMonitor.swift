@@ -227,6 +227,13 @@ public struct SessionMonitor: Equatable, Sendable {
         overcurrentEvents >= 1
     }
 
+    /// Overcurrent trips seen on this connection since it was plugged in (the
+    /// in-session delta the verdict already uses). Zero until one is seen.
+    /// Exposed so a recorder can persist the delta without re-deriving it.
+    public var overcurrentEventCount: Int {
+        overcurrentEvents
+    }
+
     /// The current verdict for this connection.
     public var verdict: Verdict {
         if dataNotDelivering || resistanceOutOfSpec || overcurrentTripped {
