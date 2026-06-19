@@ -6,21 +6,23 @@ eleventyExcludeFromCollections: true
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>{{ site.url }}/</loc>
+    <lastmod>2026-06-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
 {%- set staticPages = [
   { url: '/cables', changefreq: 'weekly', priority: '0.8' },
-  { url: '/instructions', changefreq: 'monthly', priority: '0.7' },
+  { url: '/instructions', lastmod: '2026-06-19', changefreq: 'monthly', priority: '0.7' },
   { url: '/cli', changefreq: 'monthly', priority: '0.7' },
-  { url: '/pro', changefreq: 'monthly', priority: '1.0' },
+  { url: '/pro', lastmod: '2026-06-19', changefreq: 'monthly', priority: '1.0' },
   { url: '/blog', changefreq: 'weekly', priority: '0.8' },
   { url: '/press', changefreq: 'monthly', priority: '0.6' },
   { url: '/privacy', changefreq: 'yearly', priority: '0.3' }
 ] -%}
 {% for page in staticPages %}  <url>
     <loc>{{ site.url }}{{ page.url }}</loc>
-    <changefreq>{{ page.changefreq }}</changefreq>
+{% if page.lastmod %}    <lastmod>{{ page.lastmod }}</lastmod>
+{% endif %}    <changefreq>{{ page.changefreq }}</changefreq>
     <priority>{{ page.priority }}</priority>
   </url>
 {% endfor %}
