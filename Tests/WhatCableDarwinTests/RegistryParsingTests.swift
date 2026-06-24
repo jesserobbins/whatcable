@@ -46,21 +46,31 @@ struct RegistryParsingTests {
         #expect(USBWatcher.busIndex(fromLocationID: 0x0300_0000) == 3)
     }
 
-    @Test("Front-port gate: only native + not-tunnelled + no-port-name qualifies (issue #348)")
+    @Test("Front-port gate: native + not-tunnelled + no-port-name + internal hub qualifies (issues #348, #373)")
     func behindInternalHubStructuralGate() {
         // The one true case: a device that reached a native controller, is not
-        // tunnelled, and matched no Port-USB-C@N node. This is a desktop
-        // front-panel device.
+        // tunnelled, matched no Port-USB-C@N node, and hangs off the Mac's own
+        // internal hub. This is a desktop front-panel device.
         #expect(
             USBWatcher.classifyBehindInternalHub(
-                reachedNativeController: true, tunnelled: false, portName: nil
+                reachedNativeController: true, tunnelled: false, portName: nil, underInternalHub: true
             ) == true
+        )
+
+        // Issue #373: a device behind an EXTERNAL hub. It can also reach the
+        // native controller with no port name, so the first three conditions
+        // pass, but its hub is external (USBPortType != internal), so it must
+        // NOT be grouped as built-in.
+        #expect(
+            USBWatcher.classifyBehindInternalHub(
+                reachedNativeController: true, tunnelled: false, portName: nil, underInternalHub: false
+            ) == false
         )
 
         // Back-port device: has a UsbIOPort ancestor, so portName is set.
         #expect(
             USBWatcher.classifyBehindInternalHub(
-                reachedNativeController: true, tunnelled: false, portName: "Port-USB-C@2"
+                reachedNativeController: true, tunnelled: false, portName: "Port-USB-C@2", underInternalHub: true
             ) == false
         )
 
@@ -69,13 +79,13 @@ struct RegistryParsingTests {
         // independently disqualify it, so the two device sets can't overlap.
         #expect(
             USBWatcher.classifyBehindInternalHub(
-                reachedNativeController: false, tunnelled: true, portName: nil
+                reachedNativeController: false, tunnelled: true, portName: nil, underInternalHub: false
             ) == false
         )
         // Defensive: even if a future walk somehow set both, tunnelled wins.
         #expect(
             USBWatcher.classifyBehindInternalHub(
-                reachedNativeController: true, tunnelled: true, portName: nil
+                reachedNativeController: true, tunnelled: true, portName: nil, underInternalHub: true
             ) == false
         )
 
@@ -83,9 +93,13 @@ struct RegistryParsingTests {
         // fail safe, do not classify as front-port.
         #expect(
             USBWatcher.classifyBehindInternalHub(
-                reachedNativeController: false, tunnelled: false, portName: nil
+                reachedNativeController: false, tunnelled: false, portName: nil, underInternalHub: true
             ) == false
         )
+
+        // The internal-hub port type constant matches Apple's
+        // kIOUSBHostPortTypeInternal (validated against the corpus).
+        #expect(USBWatcher.internalHubPortType == 2)
     }
 
     @Test("Thunderbolt 3 dock controllers are recognised, native/tunnel/Intel are not")

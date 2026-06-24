@@ -209,6 +209,13 @@ public final class USBWatcher: ObservableObject {
         // controller (`AppleT*USBXHCI`), as opposed to the tunnelled
         // `AppleUSBXHCITR`. Used below to gate the internal-hub classification.
         var reachedNativeController = false
+        // `USBPortType` of the nearest USB hub this device hangs off (the first
+        // `IOUSBHostDevice` ancestor we meet going up). It reports the kind of
+        // port that hub is plugged into: the Mac's own internal hubs report
+        // `internalHubPortType` (2), external hubs report 0. nil when the device
+        // sits on no hub. Used to tell a genuine built-in-port device apart from
+        // one behind an external hub (issue #373).
+        var hubPortType: Int?
 
         // Bound the walk so a malformed or cyclic registry can't loop forever.
         // The real depth from a USB device to its host controller is small (2-4
@@ -244,6 +251,24 @@ public final class USBWatcher: ObservableObject {
                     // is IOKit topology, not PII.
                     Self.log.debug("UsbIOPort path has no recognised port node: \(portPath, privacy: .public)")
                 }
+            }
+
+            // Capture the `USBPortType` of the nearest USB hub ancestor, the
+            // first one we meet going up. Only `IOUSBHostDevice` nodes (the
+            // hubs and devices) carry this key, so the first ancestor that has
+            // it is the hub this device hangs off. We take only that first one:
+            // a device behind an external hub that is itself plugged into the
+            // Mac's internal hub must read the external hub's value (0), not the
+            // internal one further up the chain (issue #373).
+            if hubPortType == nil,
+               IOObjectConformsTo(current, "IOUSBHostDevice") != 0,
+               let pt = (IORegistryEntryCreateCFProperty(
+                    current,
+                    "USBPortType" as CFString,
+                    kCFAllocatorDefault,
+                    0
+               )?.takeRetainedValue() as? NSNumber)?.intValue {
+                hubPortType = pt
             }
 
             var classBuf = [CChar](repeating: 0, count: 128)
@@ -290,7 +315,8 @@ public final class USBWatcher: ObservableObject {
         let behindInternalHub = Self.classifyBehindInternalHub(
             reachedNativeController: reachedNativeController,
             tunnelled: tunnelled,
-            portName: portName
+            portName: portName,
+            underInternalHub: hubPortType == Self.internalHubPortType
         )
 
         if bus == nil {
@@ -301,21 +327,46 @@ public final class USBWatcher: ObservableObject {
         return (bus, portName, tunnelled, behindInternalHub)
     }
 
-    /// Structural front-port classification (issue #348). True when all three
+    /// `USBPortType` value Apple reports for a port that is internal to the Mac
+    /// (`kIOUSBHostPortTypeInternal`). The Mac's own front-panel hub reports it;
+    /// external hubs (including Apple's own Studio Display and keyboard hubs)
+    /// report 0. Confirmed across the customer-probe corpus: this value is only
+    /// ever reported by Apple internal hardware, only on desktop Macs, and every
+    /// desktop's internal hub reports it.
+    ///
+    /// Cross-validated against Apple's own built-in marker: every hub that
+    /// carries the `com.apple.developer.driverkit.builtin` entitlement reports
+    /// `USBPortType == 2`, and every hub reporting 2 carries that entitlement
+    /// (97/97 both ways across the corpus). So this value is exactly the set of
+    /// Mac-internal hubs, no broader, no narrower. The corpus also has external
+    /// hubs that are easy to mistake for internal (Microchip/Prolific/Intel
+    /// generic hubs reporting `USBPortType == 5`, Studio Display hubs reporting
+    /// 0); none carry the entitlement and none report 2. See
+    /// `classifyBehindInternalHub`.
+    nonisolated static let internalHubPortType = 2
+
+    /// Structural front-port classification (issue #348). True when all four
     /// hold:
     ///   1. `reachedNativeController` -- the parent walk reached a native USB
     ///      host controller (`AppleT*USBXHCI`), not the Thunderbolt tunnel.
     ///   2. `!tunnelled` -- the walk did NOT go through `AppleUSBXHCITR`.
     ///   3. `portName == nil` -- no `UsbIOPort` ancestor, i.e. no `Port-USB-C@N`
     ///      match.
-    /// On a desktop Mac that means a plain-USB front-panel port. Back-port
-    /// devices always have a `usb-drd*-port-*` (`UsbIOPort`) ancestor, so they
-    /// fail (3). TB-tunnelled devices fail (1)/(2). An external hub on a laptop
-    /// hangs off a real port, so it also has a `UsbIOPort` ancestor and fails
-    /// (3). This structural gate replaces the earlier PID allow-list, which the
-    /// customer-probe corpus showed was both too narrow (missed M1/M2/Studio
-    /// internal-hub PIDs) and ambiguous (the same PIDs appear on external Apple
-    /// hubs).
+    ///   4. `underInternalHub` -- the hub this device hangs off is the Mac's own
+    ///      internal hub (`USBPortType == internalHubPortType`), not an external
+    ///      one.
+    /// On a desktop Mac that means a device on a plain-USB front-panel port.
+    /// Back-port devices always have a `usb-drd*-port-*` (`UsbIOPort`) ancestor,
+    /// so they fail (3). TB-tunnelled devices fail (1)/(2).
+    ///
+    /// Condition (4) is what fixes issue #373. The earlier gate assumed
+    /// `portName == nil` was enough to mean "behind the Mac's internal hub", but
+    /// a device behind an *external* hub also has no `Port-USB-C@N` node and
+    /// reaches the native controller, so its keyboard/mouse were wrongly grouped
+    /// as built-in. The hub's `USBPortType` tells the two apart: only the Mac's
+    /// internal hub reports `internalHubPortType`. Because this condition only
+    /// makes the gate stricter, it can only drop the external-hub false
+    /// positives, never reclassify a device that was already correct.
     ///
     /// This is pure structure, not a desktop guarantee: the desktop-only product
     /// policy is applied downstream in `TunnelledDeviceGrouping.group`. Pure so
@@ -323,9 +374,10 @@ public final class USBWatcher: ObservableObject {
     nonisolated static func classifyBehindInternalHub(
         reachedNativeController: Bool,
         tunnelled: Bool,
-        portName: String?
+        portName: String?,
+        underInternalHub: Bool
     ) -> Bool {
-        reachedNativeController && !tunnelled && portName == nil
+        reachedNativeController && !tunnelled && portName == nil && underInternalHub
     }
 
     /// True when `className` is the third-party USB host controller a
