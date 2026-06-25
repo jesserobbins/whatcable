@@ -587,8 +587,9 @@ struct OtherUSBDevicesCard: View {
 }
 
 /// One device in a downstream USB tree, rendered as an expandable disclosure
-/// row. Collapsed (the default) it reads exactly as before — name and speed,
-/// indented by hub depth. Expanded it reveals the detail the `USBDevice` model
+/// row. Collapsed (the default) it shows name and speed, indented by hub depth,
+/// with the DisclosureGroup chevron as the leading affordance (replacing the old
+/// "•" bullet). Expanded it reveals the detail the `USBDevice` model
 /// already carries: vendor (with VID:PID), serial and USB version. Shared by
 /// `OtherUSBDevicesCard` and `PortCard`'s device tree so the two render the
 /// same content. No new data is read here; every value comes off `USBDevice`.
@@ -596,6 +597,7 @@ struct USBDeviceRow: View {
     let node: USBDeviceNode
 
     @State private var expanded = false
+    @Environment(\.fontScale) private var fontScale
 
     private var device: USBDevice { node.device }
 
@@ -628,7 +630,7 @@ struct USBDeviceRow: View {
                         Text(row.label)
                             .scaledFont(.caption)
                             .foregroundStyle(.secondary)
-                            .frame(width: 70, alignment: .leading)
+                            .frame(width: 70 * fontScale, alignment: .leading)
                         Text(row.value)
                             .scaledFont(.caption)
                             .textSelection(.enabled)
