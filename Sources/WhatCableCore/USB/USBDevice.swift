@@ -154,6 +154,41 @@ public struct USBDevice: Identifiable, Hashable {
         return String(localized: "Billboard device present", bundle: bundle)
     }
 
+    /// Vendor label for the detail view: the device-reported `USB Vendor Name`
+    /// when present, else the bundled USB-IF database name for the VID, always
+    /// suffixed with `0xVID:0xPID`. Falls back to bare hex when no name is
+    /// known. Mirrors `VendorDB.label(for:)` so the vendor wording can't drift
+    /// from the cable view, and adds the PID the per-device view wants.
+    public var vendorDisplay: String {
+        let ids = String(format: "0x%04X:0x%04X", vendorID, productID)
+        let name = vendorName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let name, !name.isEmpty {
+            return "\(name) (\(ids))"
+        }
+        if let dbName = VendorDB.name(for: Int(vendorID)) {
+            return "\(dbName) (\(ids))"
+        }
+        return ids
+    }
+
+    /// The device's *declared* power figures, formatted for the detail view:
+    /// `currentMA` is the device's requested draw (IOKit `Requested Power`) and
+    /// `busPowerMA` is the upstream port's advertised budget (`Bus Power
+    /// Available`). Both are declared/negotiated values, NOT a live current
+    /// reading — macOS does not expose measured draw without entitlements, so
+    /// callers must label this as declared. `nil` when neither figure is known;
+    /// shows whichever single figure is present otherwise.
+    public var declaredPowerDisplay: String? {
+        var parts: [String] = []
+        if let requested = currentMA {
+            parts.append("\(requested) mA requested")
+        }
+        if let available = busPowerMA {
+            parts.append("\(available) mA available")
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
     public var speedLabel: String {
         // IOUSBHostDevice "Device Speed" enum values
         switch speedRaw {
