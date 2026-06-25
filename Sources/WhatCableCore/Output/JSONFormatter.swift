@@ -881,13 +881,19 @@ private struct USBDeviceDTO: Codable {
         self.name = device.productName
         self.vendorID = Int(device.vendorID)
         self.productID = Int(device.productID)
-        // Match the UI: device-reported name, else the VID database, so all
-        // surfaces agree on the vendor label.
+        // Match the UI: device-reported name, else the VID database. Gate the
+        // DB fallback on a real registration so the sentinel sentences
+        // VendorDB.name(for:) returns for VID 0 / 0xFFFF ("No vendor reported",
+        // "No vendor ID assigned …") never leak into this machine-readable
+        // field — downstream consumers parse it, so it stays null when there is
+        // no genuine vendor name (preserving the pre-fallback contract).
         if let reported = device.vendorName?.trimmingCharacters(in: .whitespacesAndNewlines),
            !reported.isEmpty {
             self.vendorName = reported
-        } else {
+        } else if VendorDB.isRegistered(Int(device.vendorID)) {
             self.vendorName = VendorDB.name(for: Int(device.vendorID))
+        } else {
+            self.vendorName = nil
         }
         self.serialNumber = device.serialNumber
         self.usbVersion = device.usbVersion

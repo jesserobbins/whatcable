@@ -137,6 +137,27 @@ struct JSONFormatterTests {
         #expect(devices?.first?["vendorName"] as? String == "Apple")
     }
 
+    @Test("USB device DTO vendorName stays null for unregistered VID 0 (no sentinel prose)")
+    func usbDeviceVendorNoSentinel() throws {
+        // VID 0 makes VendorDB.name(for:) return the human sentence
+        // "No vendor reported". That display prose must NOT leak into the
+        // machine-readable JSON field, which downstream consumers parse.
+        let dev = USBDevice(
+            id: 9, locationID: 0x2011_0000, vendorID: 0, productID: 0,
+            vendorName: nil, productName: "Mystery",
+            serialNumber: nil, usbVersion: nil, speedRaw: 2,
+            busPowerMA: nil, currentMA: nil, isThunderboltTunnelled: true,
+            rawProperties: [:]
+        )
+        let json = parse(try JSONFormatter.render(
+            ports: [makePort()], sources: [], identities: [], showRaw: false,
+            usbDevices: [dev]))
+        let devices = (json["otherUSBDevices"] as? [String: Any])?["devices"] as? [[String: Any]]
+        let first = try #require(devices?.first)
+        // Field is absent (encoded as nil → omitted), not the sentence.
+        #expect(first["vendorName"] == nil)
+    }
+
     // MARK: - Built-in USB ports (issue #348)
 
     @Test("builtInUSBDevices appears only on a desktop Mac with front-port devices")
