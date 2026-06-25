@@ -164,3 +164,11 @@
 "Watts display" = "Wattweergave";
 "Number" = "Getal";
 "Bar" = "Balk";
+
+/* USB device detail rows (downstream device enrichment). Labels for the
+   per-device expander: vendor, serial, USB version, declared power, alt modes. */
+"Vendor" = "Vendor";
+"Serial" = "Serial";
+"USB" = "USB";
+"Power" = "Power";
+"Alt modes" = "Alt modes";

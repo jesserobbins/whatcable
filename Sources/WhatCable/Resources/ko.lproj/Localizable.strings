@@ -164,3 +164,11 @@
 "Watts display" = "와트 표시";
 "Number" = "숫자";
 "Bar" = "막대";
+
+/* USB device detail rows (downstream device enrichment). Labels for the
+   per-device expander: vendor, serial, USB version, declared power, alt modes. */
+"Vendor" = "Vendor";
+"Serial" = "Serial";
+"USB" = "USB";
+"Power" = "Power";
+"Alt modes" = "Alt modes";
