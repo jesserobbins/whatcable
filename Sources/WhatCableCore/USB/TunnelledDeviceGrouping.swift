@@ -31,9 +31,11 @@ public enum TunnelledDeviceGrouping {
         /// set when exactly one Thunderbolt device is connected.
         public let hostPortServiceName: String?
         /// Devices on a desktop Mac's plain-USB front ports (issue #348).
-        /// Always rendered flat: front ports have no port-controller silicon so
-        /// there is nothing to attribute them to. This is the single place the
-        /// desktop-only policy is applied: it is empty unless `group` was called
+        /// Not attributed to a port (front ports have no port-controller silicon
+        /// to attribute to), but may include a hub the user plugged into a front
+        /// port, kept so its children nest under it in the rendered tree. This is
+        /// the single place the desktop-only policy is applied: it is empty unless
+        /// `group` was called
         /// with `isDesktopMac: true`, so every consumer of this array is
         /// laptop-safe without its own check. Also empty when there is no
         /// front-port activity.
@@ -50,14 +52,18 @@ public enum TunnelledDeviceGrouping {
         }
     }
 
-    /// USB Hub device class (`bDeviceClass`). The internal hubs inside a
-    /// Thunderbolt dock or display, and the Apple-VID front-panel hubs on
-    /// desktop Macs, are plumbing rather than devices the user plugged in,
-    /// so both kinds are filtered out. Spec-mandated, so this is robust (no
-    /// name matching). The dock/display's own functions (e.g. a display's
-    /// camera/audio) are left in: they are real USB devices.
-    private static let usbHubClass: UInt8 = 0x09
-
+    /// Hubs are deliberately kept in both result sets, not filtered out. A hub is
+    /// a branch point of the device tree, so dropping it collapses everything
+    /// behind it to a flat list and hides which device hangs off which hub. That
+    /// flat list is exactly what users kept reporting (issues #106, #280, #375:
+    /// "USB2.1 Hub -> Magic Trackpad" should read as the hub with the trackpad
+    /// nested under it). `USBDeviceNode.buildTree` needs the hub present to nest
+    /// its children, so keeping hubs is what lets the renderers (app, CLI, JSON)
+    /// show the real hierarchy. The Mac's own internal front-panel hub is never a
+    /// member of either set (it is the boundary the walk stops at, never itself
+    /// flagged `isThunderboltTunnelled` or `isBehindInternalHub`), so showing hubs
+    /// surfaces the hubs the user attached, never the Mac's internal plumbing.
+    ///
     /// - Parameter isDesktopMac: gates the `internalHubDevices` result. The
     ///   front-panel hub ports only exist on Mac mini / Studio / Pro, so on a
     ///   laptop the internal-hub set is forced empty here regardless of the
@@ -71,18 +77,19 @@ public enum TunnelledDeviceGrouping {
         thunderboltSwitches: [IOThunderboltSwitch],
         isDesktopMac: Bool = false
     ) -> Result {
-        let tunnelled = devices.filter {
-            $0.isThunderboltTunnelled && $0.deviceClass != usbHubClass
-        }
+        // Hubs are kept (see the type doc): they are the branch points the tree
+        // renderer needs to nest each device under the hub it hangs off.
+        let tunnelled = devices.filter { $0.isThunderboltTunnelled }
         // Front-port / internal-hub devices: those the parent walk flagged as
-        // behind the Mac's internal hub, minus the hub itself (class 0x09).
-        // Desktop-only: empty on laptops (see isDesktopMac). The tunnelled
-        // exclusion is defensive; isBehindInternalHub already implies !tunnelled.
+        // behind the Mac's internal hub. Desktop-only: empty on laptops (see
+        // isDesktopMac). The tunnelled exclusion is defensive; isBehindInternalHub
+        // already implies !tunnelled. Any hub here is one the user attached to a
+        // front port (an external hub), kept so its children nest under it; the
+        // Mac's own internal hub is the boundary of this set and never a member.
         let internalHub = isDesktopMac
             ? devices.filter {
                 $0.isBehindInternalHub
                     && !$0.isThunderboltTunnelled
-                    && $0.deviceClass != usbHubClass
             }
             : []
 

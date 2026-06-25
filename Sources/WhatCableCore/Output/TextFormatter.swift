@@ -116,8 +116,9 @@ public enum TextFormatter {
     }
 
     /// Render the Thunderbolt-tunnelled devices block (issue #274). When
-    /// `nested`, it hangs under the one connected Thunderbolt port; otherwise
-    /// it is a flat top-level section. Empty string when there are none.
+    /// `nested`, the whole block hangs under the one connected Thunderbolt port;
+    /// otherwise it is a top-level section. Either way the devices inside render
+    /// as a hub tree (children indented under their hub). Empty when there are none.
     private static func renderTunnelledDevices(_ devices: [USBDevice], nested: Bool) -> String {
         guard !devices.isEmpty else { return "" }
         var out = "\n"
@@ -139,7 +140,8 @@ public enum TextFormatter {
     /// Render the internal-hub devices block (issue #348). These are devices
     /// on the front-panel ports of a Mac mini / Studio / Pro: plain USB ports
     /// hanging off the internal Apple hub, with no port-controller silicon.
-    /// Always a flat top-level section. Empty string when there are none.
+    /// Always a top-level section (never nested under a port), but the devices
+    /// inside render as a hub tree. Empty string when there are none.
     private static func renderInternalHubDevices(_ devices: [USBDevice]) -> String {
         guard !devices.isEmpty else { return "" }
         var out = "\n"

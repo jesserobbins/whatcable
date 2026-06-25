@@ -13,11 +13,12 @@ struct TunnelledDeviceGroupingTests {
         name: String,
         tunnelled: Bool,
         behindInternalHub: Bool = false,
-        deviceClass: UInt8? = nil
+        deviceClass: UInt8? = nil,
+        locationID: UInt32? = nil
     ) -> USBDevice {
         USBDevice(
             id: id,
-            locationID: UInt32(truncatingIfNeeded: id),
+            locationID: locationID ?? UInt32(truncatingIfNeeded: id),
             vendorID: 0x05AC,
             productID: 0x1234,
             vendorName: "Apple",
@@ -137,8 +138,8 @@ struct TunnelledDeviceGroupingTests {
         #expect(result.devices.map(\.productName) == ["TB Keyboard"])
     }
 
-    @Test("Internal USB hubs (class 0x09) are filtered out; real devices kept")
-    func filtersHubs() {
+    @Test("Hubs (class 0x09) are kept so the device tree can nest under them (issues #106, #375)")
+    func keepsHubs() {
         let result = TunnelledDeviceGrouping.group(
             devices: [
                 device(id: 1, name: "USB2 Hub", tunnelled: true, deviceClass: 0x09),
@@ -149,7 +150,34 @@ struct TunnelledDeviceGroupingTests {
             ports: [port(socketID: "2")],
             thunderboltSwitches: []
         )
-        #expect(result.devices.map(\.productName) == ["Studio Display", "Magic Keyboard"])
+        // The hubs used to be dropped, which flattened the topology. They are now
+        // retained alongside the real devices, so nothing the user plugged in is
+        // hidden and the renderer can show which device hangs off which hub.
+        #expect(Set(result.devices.map(\.productName))
+            == ["USB2 Hub", "USB3 Gen2 Hub", "Studio Display", "Magic Keyboard"])
+    }
+
+    @Test("A kept hub nests its child in the rendered tree (the #106 / #375 case)")
+    func hubNestsChildInTree() {
+        // A dock with a hub (locationID 0x0A100000) and a trackpad one hop
+        // behind it (0x0A110000, whose parent nibble resolves back to the hub).
+        let result = TunnelledDeviceGrouping.group(
+            devices: [
+                device(id: 1, name: "USB2.1 Hub", tunnelled: true, deviceClass: 0x09,
+                       locationID: 0x0A10_0000),
+                device(id: 2, name: "Magic Trackpad", tunnelled: true, deviceClass: 0x00,
+                       locationID: 0x0A11_0000)
+            ],
+            ports: [port(socketID: "2")],
+            thunderboltSwitches: []
+        )
+        // The grouping keeps both; buildTree (used by every renderer) then nests
+        // the trackpad under the hub instead of listing it as a flat top-level row.
+        let tree = USBDeviceNode.buildTree(from: result.devices)
+        #expect(tree.count == 1)
+        #expect(tree.first?.device.productName == "USB2.1 Hub")
+        #expect(tree.first?.children.map(\.device.productName) == ["Magic Trackpad"])
+        #expect(tree.first?.children.first?.depth == 1)
     }
 
     @Test("One connected Thunderbolt device nests tunnelled devices under that port")
@@ -166,6 +194,31 @@ struct TunnelledDeviceGroupingTests {
         )
         #expect(result.devices.count == 2)
         #expect(result.hostPortServiceName == "Port-USB-C@2")
+    }
+
+    @Test("A hub-behind-a-hub dock cascade nests two levels deep")
+    func hubChainNestsTwoLevels() {
+        // Real dock cascades chain hubs (the corpus has setups 6 levels deep).
+        // Dock hub A (0x0C100000) -> hub B one hop behind it (0x0C110000) ->
+        // a drive one hop behind B (0x0C111000). Each parent nibble resolves to
+        // the level above, so buildTree must produce A > B > drive.
+        let result = TunnelledDeviceGrouping.group(
+            devices: [
+                device(id: 1, name: "Dock hub", tunnelled: true, deviceClass: 0x09, locationID: 0x0C10_0000),
+                device(id: 2, name: "Second hub", tunnelled: true, deviceClass: 0x09, locationID: 0x0C11_0000),
+                device(id: 3, name: "SSD", tunnelled: true, deviceClass: 0x08, locationID: 0x0C11_1000)
+            ],
+            ports: [port(socketID: "2")],
+            thunderboltSwitches: []
+        )
+        let tree = USBDeviceNode.buildTree(from: result.devices)
+        #expect(tree.count == 1)
+        #expect(tree.first?.device.productName == "Dock hub")
+        let second = tree.first?.children.first
+        #expect(second?.device.productName == "Second hub")
+        #expect(second?.depth == 1)
+        #expect(second?.children.map(\.device.productName) == ["SSD"])
+        #expect(second?.children.first?.depth == 2)
     }
 
     @Test("Two connected Thunderbolt devices fall back to a flat list (no host port)")
@@ -239,37 +292,43 @@ struct TunnelledDeviceGroupingTests {
         #expect(desktop.internalHubDevices.map(\.productName) == ["Front USB drive"])
     }
 
-    @Test("The internal hub itself (deviceClass 0x09) is filtered out")
-    func internalHubFiltersHubs() {
-        // The internal hub also satisfies the behind-internal-hub gate (it
-        // reaches a native controller with no UsbIOPort ancestor), so the
-        // fixtures carry behindInternalHub: true. That makes the deviceClass
-        // 0x09 check the load-bearing filter here, not the flag.
+    @Test("An external hub on a front port is kept in the front list, not dropped")
+    func internalHubKeepsExternalHub() {
+        // A hub the user plugs into a front port hangs off the Mac's internal
+        // hub, so the parent walk flags it behindInternalHub. It is a real thing
+        // the user attached, so it is kept (and its children nest under it). Only
+        // the Mac's own internal hub is excluded, and that is never a member of
+        // this set (it is the boundary the walk stops at), so it cannot appear
+        // here regardless of the class check.
         let result = TunnelledDeviceGrouping.group(
             devices: [
-                device(id: 1, name: "USB2 Hub", tunnelled: false, behindInternalHub: true, deviceClass: 0x09),
-                device(id: 2, name: "USB3 Gen2 Hub", tunnelled: false, behindInternalHub: true, deviceClass: 0x09),
-                device(id: 3, name: "Front drive", tunnelled: false, behindInternalHub: true)
-            ],
-            ports: [port(socketID: "1")],
-            thunderboltSwitches: [],
-            isDesktopMac: true
-        )
-        #expect(result.internalHubDevices.map(\.productName) == ["Front drive"])
-    }
-
-    @Test("Hubs behind the internal hub are also filtered out of the front list")
-    func internalHubFiltersChildHubs() {
-        let result = TunnelledDeviceGrouping.group(
-            devices: [
-                device(id: 1, name: "Daisy-chained hub", tunnelled: false, behindInternalHub: true, deviceClass: 0x09),
+                device(id: 1, name: "External USB3 Hub", tunnelled: false, behindInternalHub: true, deviceClass: 0x09),
                 device(id: 2, name: "Front drive", tunnelled: false, behindInternalHub: true)
             ],
             ports: [port(socketID: "1")],
             thunderboltSwitches: [],
             isDesktopMac: true
         )
-        #expect(result.internalHubDevices.map(\.productName) == ["Front drive"])
+        #expect(Set(result.internalHubDevices.map(\.productName)) == ["External USB3 Hub", "Front drive"])
+    }
+
+    @Test("A device behind an external front-port hub nests under that hub")
+    func internalHubChildNests() {
+        let result = TunnelledDeviceGrouping.group(
+            devices: [
+                device(id: 1, name: "External hub", tunnelled: false, behindInternalHub: true,
+                       deviceClass: 0x09, locationID: 0x0B10_0000),
+                device(id: 2, name: "Keyboard", tunnelled: false, behindInternalHub: true,
+                       deviceClass: 0x00, locationID: 0x0B11_0000)
+            ],
+            ports: [port(socketID: "1")],
+            thunderboltSwitches: [],
+            isDesktopMac: true
+        )
+        let tree = USBDeviceNode.buildTree(from: result.internalHubDevices)
+        #expect(tree.count == 1)
+        #expect(tree.first?.device.productName == "External hub")
+        #expect(tree.first?.children.map(\.device.productName) == ["Keyboard"])
     }
 
     @Test("Tunnelled-and-nested coexists with a front-port section")
@@ -288,6 +347,33 @@ struct TunnelledDeviceGroupingTests {
         #expect(result.devices.map(\.productName) == ["TB mouse"])
         #expect(result.hostPortServiceName == "Port-USB-C@2")
         #expect(result.internalHubDevices.map(\.productName) == ["Front drive"])
+    }
+
+    @Test("No off-port device is silently dropped: hubs and leaves are all accounted for")
+    func noOffPortDeviceIsHidden() {
+        // The recurring complaint (issues #106, #280, #348, #373, #375) was always
+        // "device counted but listed nowhere". This pins the contract for the two
+        // sets this function owns: every device flagged tunnelled, or (on a
+        // desktop) behind the internal hub, must come back in exactly one of the
+        // sets, hubs included. A native-port device belongs to a port card and so
+        // appears in neither set here.
+        let devices = [
+            device(id: 1, name: "Native port mouse", tunnelled: false),
+            device(id: 2, name: "Dock hub", tunnelled: true, deviceClass: 0x09),
+            device(id: 3, name: "Dock SSD", tunnelled: true),
+            device(id: 4, name: "Front external hub", tunnelled: false, behindInternalHub: true, deviceClass: 0x09),
+            device(id: 5, name: "Front keyboard", tunnelled: false, behindInternalHub: true)
+        ]
+        let result = TunnelledDeviceGrouping.group(
+            devices: devices,
+            ports: [port(socketID: "1")],
+            thunderboltSwitches: [],
+            isDesktopMac: true
+        )
+        let shown = Set(result.devices.map(\.id)).union(result.internalHubDevices.map(\.id))
+        let expectedOffPort = Set(devices.filter { $0.isThunderboltTunnelled || $0.isBehindInternalHub }.map(\.id))
+        #expect(shown == expectedOffPort)          // every off-port device, including both hubs
+        #expect(!shown.contains(1))                // the native-port device is not pulled off-port
     }
 
     @Test("A device flagged both tunnelled and internal-hub goes only to the tunnelled set")
