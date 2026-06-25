@@ -523,11 +523,7 @@ struct OtherUSBDevicesCard: View {
                     .scaledFont(.headline, weight: .semibold)
             }
             ForEach(tree) { node in
-                let name = node.device.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
-                let prefix = node.depth > 0 ? "\u{21B3} " : "\u{2022} "
-                Text(verbatim: "\(prefix)\(name) - \(node.device.speedLabel)")
-                    .scaledFont(.callout)
-                    .padding(.leading, CGFloat(node.depth) * 16)
+                USBDeviceRow(node: node)
             }
             Text(footer)
                 .scaledFont(.caption)
@@ -536,6 +532,70 @@ struct OtherUSBDevicesCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 10))
+    }
+}
+
+/// One device in a downstream USB tree, rendered as an expandable disclosure
+/// row. Collapsed (the default) it reads exactly as before — name and speed,
+/// indented by hub depth. Expanded it reveals the detail the `USBDevice` model
+/// already carries: vendor (with VID:PID), serial, USB version, declared power,
+/// and advertised Alt Modes. Shared by `OtherUSBDevicesCard` and `PortCard`'s
+/// device tree so the two render the same content. No new data is read here;
+/// every value comes off `USBDevice`.
+struct USBDeviceRow: View {
+    let node: USBDeviceNode
+
+    @State private var expanded = false
+
+    private var device: USBDevice { node.device }
+
+    /// The detail rows to show when expanded, as (label, value) pairs. A row is
+    /// included only when its value is present, so an absent serial or power
+    /// figure leaves no empty line.
+    private var detailRows: [(label: String, value: String)] {
+        var rows: [(String, String)] = []
+        rows.append((String(localized: "Vendor", bundle: _appLocalizedBundle), device.vendorDisplay))
+        if let serial = device.serialNumber?.trimmingCharacters(in: .whitespacesAndNewlines), !serial.isEmpty {
+            rows.append((String(localized: "Serial", bundle: _appLocalizedBundle), serial))
+        }
+        if let version = device.usbVersion {
+            rows.append((String(localized: "USB", bundle: _appLocalizedBundle), version))
+        }
+        if let power = device.declaredPowerDisplay {
+            rows.append((String(localized: "Power", bundle: _appLocalizedBundle), power))
+        }
+        let protocols = device.billboard?.namedProtocols ?? []
+        if !protocols.isEmpty {
+            rows.append((String(localized: "Alt modes", bundle: _appLocalizedBundle),
+                         protocols.joined(separator: ", ")))
+        }
+        return rows
+    }
+
+    var body: some View {
+        let name = device.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
+        let prefix = node.depth > 0 ? "\u{21B3} " : "\u{2022} "
+        DisclosureGroup(isExpanded: $expanded) {
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(detailRows, id: \.label) { row in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(row.label)
+                            .scaledFont(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 70, alignment: .leading)
+                        Text(row.value)
+                            .scaledFont(.caption)
+                            .textSelection(.enabled)
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+            .padding(.top, 2)
+        } label: {
+            Text(verbatim: "\(prefix)\(name) - \(device.speedLabel)")
+                .scaledFont(.callout)
+        }
+        .padding(.leading, CGFloat(node.depth) * 16)
     }
 }
 
@@ -623,11 +683,7 @@ struct PortCard: View {
                 .scaledFont(.subheadline, weight: .semibold)
                 .foregroundStyle(.secondary)
             ForEach(tree) { node in
-                let name = node.device.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
-                let prefix = node.depth > 0 ? "\u{21B3} " : "\u{2022} "
-                Text(verbatim: "\(prefix)\(name) - \(node.device.speedLabel)")
-                    .scaledFont(.callout)
-                    .padding(.leading, CGFloat(node.depth) * 16)
+                USBDeviceRow(node: node)
             }
             if let note {
                 Text(note)
