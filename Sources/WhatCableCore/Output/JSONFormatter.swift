@@ -865,17 +865,36 @@ private struct USBDeviceDTO: Codable {
     let vendorID: Int
     let productID: Int
     let vendorName: String?
+    let serialNumber: String?
+    let usbVersion: String?
     let speed: String
+    /// Device's declared requested draw (IOKit `Requested Power`), in mA.
+    /// Declared/negotiated, NOT a measured live current.
+    let requestedPowerMA: Int?
+    /// Upstream port's advertised power budget (`Bus Power Available`), in mA.
+    let busPowerAvailableMA: Int?
     let locationID: String
     let children: [USBDeviceDTO]?
 
     init(node: USBDeviceNode) {
-        self.name = node.device.productName
-        self.vendorID = Int(node.device.vendorID)
-        self.productID = Int(node.device.productID)
-        self.vendorName = node.device.vendorName
-        self.speed = node.device.speedLabel
-        self.locationID = String(format: "0x%08x", node.device.locationID)
+        let device = node.device
+        self.name = device.productName
+        self.vendorID = Int(device.vendorID)
+        self.productID = Int(device.productID)
+        // Match the UI: device-reported name, else the VID database, so all
+        // surfaces agree on the vendor label.
+        if let reported = device.vendorName?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !reported.isEmpty {
+            self.vendorName = reported
+        } else {
+            self.vendorName = VendorDB.name(for: Int(device.vendorID))
+        }
+        self.serialNumber = device.serialNumber
+        self.usbVersion = device.usbVersion
+        self.speed = device.speedLabel
+        self.requestedPowerMA = device.currentMA
+        self.busPowerAvailableMA = device.busPowerMA
+        self.locationID = String(format: "0x%08x", device.locationID)
         self.children = node.children.isEmpty ? nil : node.children.map { USBDeviceDTO(node: $0) }
     }
 }

@@ -99,6 +99,44 @@ struct JSONFormatterTests {
         #expect(without["otherUSBDevices"] == nil)
     }
 
+    @Test("USB device DTO carries identity and declared-power detail fields")
+    func usbDeviceDetailFields() throws {
+        let drive = USBDevice(
+            id: 7, locationID: 0x2011_0000, vendorID: 0x0BC2, productID: 0x2322,
+            vendorName: "Seagate", productName: "Expansion",
+            serialNumber: "NA8XYZ12", usbVersion: "3.10",
+            speedRaw: 4, busPowerMA: 900, currentMA: 896,
+            isThunderboltTunnelled: true,
+            rawProperties: [:]
+        )
+        let json = parse(try JSONFormatter.render(
+            ports: [makePort()], sources: [], identities: [], showRaw: false,
+            usbDevices: [drive]))
+        let dev = (json["otherUSBDevices"] as? [String: Any])?["devices"] as? [[String: Any]]
+        let first = try #require(dev?.first)
+        #expect(first["serialNumber"] as? String == "NA8XYZ12")
+        #expect(first["usbVersion"] as? String == "3.10")
+        #expect(first["requestedPowerMA"] as? Int == 896)
+        #expect(first["busPowerAvailableMA"] as? Int == 900)
+    }
+
+    @Test("USB device DTO vendorName falls back to the VID database")
+    func usbDeviceVendorFallback() throws {
+        // Device reports no USB Vendor Name; 0x05AC resolves to Apple in the DB.
+        let dev = USBDevice(
+            id: 8, locationID: 0x2011_0000, vendorID: 0x05AC, productID: 0x12A8,
+            vendorName: nil, productName: "Unnamed",
+            serialNumber: nil, usbVersion: nil, speedRaw: 4,
+            busPowerMA: nil, currentMA: nil, isThunderboltTunnelled: true,
+            rawProperties: [:]
+        )
+        let json = parse(try JSONFormatter.render(
+            ports: [makePort()], sources: [], identities: [], showRaw: false,
+            usbDevices: [dev]))
+        let devices = (json["otherUSBDevices"] as? [String: Any])?["devices"] as? [[String: Any]]
+        #expect(devices?.first?["vendorName"] as? String == "Apple")
+    }
+
     // MARK: - Built-in USB ports (issue #348)
 
     @Test("builtInUSBDevices appears only on a desktop Mac with front-port devices")
