@@ -574,7 +574,11 @@ struct USBDeviceRow: View {
 
     var body: some View {
         let name = device.productName ?? String(localized: "Unknown", bundle: _appLocalizedBundle)
-        let prefix = node.depth > 0 ? "\u{21B3} " : "\u{2022} "
+        // No leading bullet: DisclosureGroup draws its own chevron as the row's
+        // leading affordance, so a bullet here would double up. The "↳" on
+        // nested devices stays — it marks "behind a hub", which the chevron and
+        // indentation alone don't convey.
+        let prefix = node.depth > 0 ? "\u{21B3} " : ""
         DisclosureGroup(isExpanded: $expanded) {
             VStack(alignment: .leading, spacing: 2) {
                 ForEach(detailRows, id: \.label) { row in
