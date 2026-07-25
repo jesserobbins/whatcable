@@ -613,6 +613,11 @@ struct USBDeviceRow: View {
         if let version = device.usbVersion {
             rows.append((String(localized: "USB", bundle: _appLocalizedBundle), version))
         }
+        let protocols = device.billboard?.namedProtocols ?? []
+        if !protocols.isEmpty {
+            rows.append((String(localized: "Alt modes", bundle: _appLocalizedBundle),
+                         protocols.joined(separator: ", ")))
+        }
         return rows
     }
 
