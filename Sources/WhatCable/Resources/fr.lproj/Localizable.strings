@@ -179,7 +179,8 @@
 "OK" = "OK";
 "Learn more" = "En savoir plus";
 /* USB device detail rows (downstream device enrichment). Labels for the
-   per-device expander: vendor, serial and USB version. */
+   per-device expander: vendor, serial, USB version and declared power. */
 "Vendor" = "Vendor";
 "Serial" = "Serial";
 "USB" = "USB";
+"Power" = "Power";

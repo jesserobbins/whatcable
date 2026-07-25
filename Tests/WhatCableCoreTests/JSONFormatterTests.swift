@@ -139,6 +139,25 @@ struct JSONFormatterTests {
         #expect(first["usbVersion"] as? String == "3.10")
     }
 
+    @Test("USB device DTO carries declared-power fields")
+    func usbDeviceDeclaredPowerFields() throws {
+        let drive = USBDevice(
+            id: 7, locationID: 0x2011_0000, vendorID: 0x0BC2, productID: 0x2322,
+            vendorName: "Seagate", productName: "Expansion",
+            serialNumber: nil, usbVersion: nil,
+            speedRaw: 4, busPowerMA: 900, currentMA: 896,
+            isThunderboltTunnelled: true,
+            rawProperties: [:]
+        )
+        let json = parse(try JSONFormatter.render(
+            ports: [makePort()], sources: [], identities: [], showRaw: false,
+            usbDevices: [drive]))
+        let dev = (json["otherUSBDevices"] as? [String: Any])?["devices"] as? [[String: Any]]
+        let first = try #require(dev?.first)
+        #expect(first["requestedPowerMA"] as? Int == 896)
+        #expect(first["busPowerAvailableMA"] as? Int == 900)
+    }
+
     @Test("USB device DTO vendorName falls back to the VID database")
     func usbDeviceVendorFallback() throws {
         // Device reports no USB Vendor Name; 0x05AC resolves to Apple in the DB.

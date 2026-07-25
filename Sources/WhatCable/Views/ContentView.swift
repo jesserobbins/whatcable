@@ -590,9 +590,10 @@ struct OtherUSBDevicesCard: View {
 /// row. Collapsed (the default) it shows name and speed, indented by hub depth,
 /// with the DisclosureGroup chevron as the leading affordance (replacing the old
 /// "•" bullet). Expanded it reveals the detail the `USBDevice` model
-/// already carries: vendor (with VID:PID), serial and USB version. Shared by
-/// `OtherUSBDevicesCard` and `PortCard`'s device tree so the two render the
-/// same content. No new data is read here; every value comes off `USBDevice`.
+/// already carries: vendor (with VID:PID), serial, USB version and declared
+/// power. Shared by `OtherUSBDevicesCard` and `PortCard`'s device tree so the
+/// two render the same content. No new data is read here; every value comes
+/// off `USBDevice`.
 struct USBDeviceRow: View {
     let node: USBDeviceNode
 
@@ -612,6 +613,9 @@ struct USBDeviceRow: View {
         }
         if let version = device.usbVersion {
             rows.append((String(localized: "USB", bundle: _appLocalizedBundle), version))
+        }
+        if let power = device.declaredPowerDisplay {
+            rows.append((String(localized: "Power", bundle: _appLocalizedBundle), power))
         }
         return rows
     }

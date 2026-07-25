@@ -963,6 +963,11 @@ private struct USBDeviceDTO: Codable {
     let serialNumber: String?
     let usbVersion: String?
     let speed: String
+    /// Device's declared requested draw (IOKit `Requested Power`), in mA.
+    /// Declared/negotiated, NOT a measured live current.
+    let requestedPowerMA: Int?
+    /// Upstream port's advertised power budget (`Bus Power Available`), in mA.
+    let busPowerAvailableMA: Int?
     let locationID: String
     let children: [USBDeviceDTO]?
 
@@ -988,6 +993,8 @@ private struct USBDeviceDTO: Codable {
         self.serialNumber = device.serialNumber
         self.usbVersion = device.usbVersion
         self.speed = device.speedLabel
+        self.requestedPowerMA = device.currentMA
+        self.busPowerAvailableMA = device.busPowerMA
         self.locationID = String(format: "0x%08x", device.locationID)
         self.children = node.children.isEmpty ? nil : node.children.map { USBDeviceDTO(node: $0) }
     }

@@ -172,6 +172,24 @@ public struct USBDevice: Identifiable, Hashable {
         return ids
     }
 
+    /// The device's *declared* power figures, formatted for the detail view:
+    /// `currentMA` is the device's requested draw (IOKit `Requested Power`) and
+    /// `busPowerMA` is the upstream port's advertised budget (`Bus Power
+    /// Available`). Both are declared/negotiated values, NOT a live current
+    /// reading — macOS does not expose measured draw without entitlements, so
+    /// callers must label this as declared. `nil` when neither figure is known;
+    /// shows whichever single figure is present otherwise.
+    public var declaredPowerDisplay: String? {
+        var parts: [String] = []
+        if let requested = currentMA {
+            parts.append("\(requested) mA requested")
+        }
+        if let available = busPowerMA {
+            parts.append("\(available) mA available")
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
     public var speedLabel: String {
         // IOUSBHostDevice "Device Speed" enum values
         switch speedRaw {

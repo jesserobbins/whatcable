@@ -10,12 +10,14 @@ struct USBDeviceDetailTests {
         productID: UInt16 = 0,
         vendorName: String? = nil,
         serialNumber: String? = nil,
-        usbVersion: String? = nil
+        usbVersion: String? = nil,
+        busPowerMA: Int? = nil,
+        currentMA: Int? = nil
     ) -> USBDevice {
         USBDevice(
             id: 1, locationID: 0x0100_0000, vendorID: vendorID, productID: productID,
             vendorName: vendorName, productName: "Widget", serialNumber: serialNumber,
-            usbVersion: usbVersion, speedRaw: nil, busPowerMA: nil, currentMA: nil,
+            usbVersion: usbVersion, speedRaw: nil, busPowerMA: busPowerMA, currentMA: currentMA,
             rawProperties: [:]
         )
     }
@@ -42,5 +44,31 @@ struct USBDeviceDetailTests {
         #expect(VendorDB.name(for: 0xF00D) == nil)
         let d = device(vendorID: 0xF00D, productID: 0x0002, vendorName: nil)
         #expect(d.vendorDisplay == "0xF00D:0x0002")
+    }
+
+    // MARK: - declaredPowerDisplay
+
+    @Test("declaredPowerDisplay shows both requested and available when present")
+    func powerBoth() {
+        let d = device(busPowerMA: 900, currentMA: 500)
+        #expect(d.declaredPowerDisplay == "500 mA requested · 900 mA available")
+    }
+
+    @Test("declaredPowerDisplay shows only requested when available is absent")
+    func powerRequestedOnly() {
+        let d = device(busPowerMA: nil, currentMA: 500)
+        #expect(d.declaredPowerDisplay == "500 mA requested")
+    }
+
+    @Test("declaredPowerDisplay shows only available when requested is absent")
+    func powerAvailableOnly() {
+        let d = device(busPowerMA: 900, currentMA: nil)
+        #expect(d.declaredPowerDisplay == "900 mA available")
+    }
+
+    @Test("declaredPowerDisplay is nil when neither figure is present")
+    func powerNeither() {
+        let d = device(busPowerMA: nil, currentMA: nil)
+        #expect(d.declaredPowerDisplay == nil)
     }
 }
