@@ -155,6 +155,23 @@ public struct USBDevice: Identifiable, Hashable {
         return String(localized: "Billboard device present", bundle: bundle)
     }
 
+    /// Vendor label for the detail view: the device-reported `USB Vendor Name`
+    /// when present, else the bundled USB-IF database name for the VID, always
+    /// suffixed with `0xVID:0xPID`. Falls back to bare hex when no name is
+    /// known. Mirrors `VendorDB.label(for:)` so the vendor wording can't drift
+    /// from the cable view, and adds the PID the per-device view wants.
+    public var vendorDisplay: String {
+        let ids = String(format: "0x%04X:0x%04X", vendorID, productID)
+        let name = vendorName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let name, !name.isEmpty {
+            return "\(name) (\(ids))"
+        }
+        if let dbName = VendorDB.name(for: Int(vendorID)) {
+            return "\(dbName) (\(ids))"
+        }
+        return ids
+    }
+
     public var speedLabel: String {
         // IOUSBHostDevice "Device Speed" enum values
         switch speedRaw {
