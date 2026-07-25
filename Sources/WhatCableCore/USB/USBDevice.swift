@@ -303,6 +303,50 @@ public struct USBDeviceNode: Identifiable {
         return result
     }
 
+    /// One group of top-level devices sharing a USB controller.
+    public struct BusGroup {
+        /// Upper byte of the controller's `locationID`, e.g. `0x21`.
+        public let bus: Int
+        /// Top-level nodes on this controller, each with its hub children.
+        public let roots: [USBDeviceNode]
+    }
+
+    /// Top-level nodes grouped by the USB controller they enumerate on, in
+    /// first-seen order.
+    ///
+    /// A dock spreads its downstream devices across the several USB
+    /// controllers inside it, and which devices share a bus is the difference
+    /// between diagnosing a bandwidth problem and guessing at it.
+    ///
+    /// Returns `nil` when the devices span fewer than two buses, or when any
+    /// device has no `busIndex`: callers render their plain tree then. A lone
+    /// group header would add a level of indentation and no information, and a
+    /// partial grouping would imply a device sits on a bus we could not read.
+    ///
+    /// Grouping is by top-level node rather than per device, because
+    /// everything behind a hub reaches the Mac through the same controller as
+    /// the hub itself.
+    public static func groupedByBus(from devices: [USBDevice]) -> [BusGroup]? {
+        let tree = buildTree(from: devices)
+        var order: [Int] = []
+        var byBus: [Int: [USBDeviceNode]] = [:]
+        for root in tree {
+            guard let bus = root.device.busIndex else { return nil }
+            if byBus[bus] == nil { order.append(bus) }
+            byBus[bus, default: []].append(root)
+        }
+        guard order.count > 1 else { return nil }
+        return order.map { BusGroup(bus: $0, roots: byBus[$0] ?? []) }
+    }
+
+    /// "USB bus 0x21", the header shown above a `BusGroup`. The hex identifier
+    /// is kept as-is: it is raw registry truth and the join key people use
+    /// when comparing against `system_profiler` output.
+    public static func busLabel(_ bus: Int) -> String {
+        let word = String(localized: "USB bus", bundle: _coreLocalizedBundle)
+        return "\(word) \(String(format: "0x%02X", bus))"
+    }
+
     /// A flat list of (name, speed, depth) tuples for the device tree rooted
     /// at `devices`, ready for rendering. Depth 0 = top-level device;
     /// depth N > 0 = device behind N hubs. Mirrors the loop in TextFormatter

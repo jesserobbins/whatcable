@@ -49,12 +49,7 @@ public enum ConnectedDeviceTree {
         thunderboltSwitches: [IOThunderboltSwitch],
         displayPorts: [IOPortTransportStateDisplayPort]
     ) -> [Row] {
-        let deviceRows = USBDeviceNode.flatten(USBDeviceNode.buildTree(from: devices)).map { node in
-            Row(
-                label: "\(node.device.productName ?? String(localized: "Unknown", bundle: _coreLocalizedBundle)) - \(node.device.speedLabel)",
-                depth: node.depth
-            )
-        }
+        let deviceRows = deviceRowsGroupedByBus(devices)
 
         guard let hostRoot = thunderboltHostRoot(port: port, switches: thunderboltSwitches),
               let root = thunderboltRootRow(hostRoot: hostRoot, switches: thunderboltSwitches)
@@ -102,6 +97,29 @@ public enum ConnectedDeviceTree {
         }
         rows.append(contentsOf: deviceRows.map { Row(label: $0.label, depth: $0.depth + 1) })
         return rows
+    }
+
+    /// Device rows, grouped under a header per USB controller when the port
+    /// has more than one. Falls back to the plain tree otherwise, so the
+    /// single-bus case and every directly-attached port render as before.
+    private static func deviceRowsGroupedByBus(_ devices: [USBDevice]) -> [Row] {
+        guard let groups = USBDeviceNode.groupedByBus(from: devices) else {
+            return USBDeviceNode.flatten(USBDeviceNode.buildTree(from: devices)).map {
+                Row(label: deviceLabel(for: $0), depth: $0.depth)
+            }
+        }
+        return groups.flatMap { group in
+            [Row(label: USBDeviceNode.busLabel(group.bus), depth: 0)]
+                + USBDeviceNode.flatten(group.roots).map {
+                    Row(label: deviceLabel(for: $0), depth: $0.depth + 1)
+                }
+        }
+    }
+
+    private static func deviceLabel(for node: USBDeviceNode) -> String {
+        let name = node.device.productName
+            ?? String(localized: "Unknown", bundle: _coreLocalizedBundle)
+        return "\(name) - \(node.device.speedLabel)"
     }
 
     /// The host root switch for this port, if it maps to one. Shared by

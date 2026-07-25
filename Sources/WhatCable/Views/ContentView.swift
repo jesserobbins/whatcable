@@ -565,7 +565,6 @@ struct OtherUSBDevicesCard: View {
     }
 
     var body: some View {
-        let tree = USBDeviceNode.flatten(USBDeviceNode.buildTree(from: devices))
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Image(systemName: "cable.connector.horizontal")
@@ -573,8 +572,24 @@ struct OtherUSBDevicesCard: View {
                 Text(title)
                     .scaledFont(.headline, weight: .semibold)
             }
-            ForEach(tree) { node in
-                USBDeviceRow(node: node)
+            // A dock fans its devices out across several USB controllers, so
+            // group them by bus to show which ones share one. Nil when there
+            // is only one bus: the flat tree then renders exactly as before.
+            if let groups = USBDeviceNode.groupedByBus(from: devices) {
+                ForEach(groups, id: \.bus) { group in
+                    Text(verbatim: USBDeviceNode.busLabel(group.bus))
+                        .scaledFont(.caption, weight: .semibold)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
+                    ForEach(USBDeviceNode.flatten(group.roots)) { node in
+                        USBDeviceRow(node: node)
+                            .padding(.leading, 12)
+                    }
+                }
+            } else {
+                ForEach(USBDeviceNode.flatten(USBDeviceNode.buildTree(from: devices))) { node in
+                    USBDeviceRow(node: node)
+                }
             }
             Text(footer)
                 .scaledFont(.caption)
